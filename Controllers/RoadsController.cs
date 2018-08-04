@@ -55,6 +55,30 @@ namespace osm_road_overlay.Controllers
             );
         }
 
+        static SizeF Vector(PointF start, PointF end) {
+            var dx = end.X - start.X;
+            var dy = end.Y - start.Y;
+            var length = Math.Sqrt(dx * dx + dy * dy);
+            return new SizeF() {
+                Width = (float)(dx / length),
+                Height = (float)(dy / length)
+            };
+        }
+
+        static SizeF Flip(SizeF point) {
+            return new SizeF() {
+                Width = point.Height,
+                Height = -point.Width
+            };
+        }
+
+        static PointF Offset(PointF point, SizeF direction, float distance) {
+            return new PointF() {
+                X = point.X + direction.Width * distance,
+                Y = point.Y + direction.Height * distance,
+            };
+        }
+
         struct OverpassResponse {
             public OverpassResponseElement[] elements;
         }
@@ -118,28 +142,46 @@ namespace osm_road_overlay.Controllers
             var image = new Image<Rgba32>(256, 256);
             image.Mutate(context =>
             {
-                RenderWays(ways, nodesById, (way, node1, node2) =>
-                {
+                RenderWays(ways, (way) => {
                     var lanes = GetLanes(way);
                     if (lanes > 0) {
-                        context.DrawLines(
-                            kerbColor,
-                            laneWidth * lanes + 1,
-                            GetPointFromNode(nw, se, node1),
-                            GetPointFromNode(nw, se, node2)
-                        );
+                        RenderWaySegments(way, nodesById, (node1, node2) => {
+                            var point1 = GetPointFromNode(nw, se, node1);
+                            var point2 = GetPointFromNode(nw, se, node2);
+                            var dir = Vector(point1, point2);
+                            var offDir = Flip(dir);
+                            var halfWidth = laneWidth * lanes / 2 + 2;
+                            context.FillPolygon(
+                                kerbColor,
+                                Offset(point1, offDir, halfWidth),
+                                Offset(point1, dir, -halfWidth),
+                                Offset(point1, offDir, -halfWidth),
+                                Offset(point2, offDir, -halfWidth),
+                                Offset(point2, dir, halfWidth),
+                                Offset(point2, offDir, halfWidth)
+                            );
+                        });
                     }
                 });
-                RenderWays(ways, nodesById, (way, node1, node2) =>
-                {
+                RenderWays(ways, (way) => {
                     var lanes = GetLanes(way);
                     if (lanes > 0) {
-                        context.DrawLines(
-                            roadColor,
-                            laneWidth * lanes,
-                            GetPointFromNode(nw, se, node1),
-                            GetPointFromNode(nw, se, node2)
-                        );
+                        RenderWaySegments(way, nodesById, (node1, node2) => {
+                            var point1 = GetPointFromNode(nw, se, node1);
+                            var point2 = GetPointFromNode(nw, se, node2);
+                            var dir = Vector(point1, point2);
+                            var offDir = Flip(dir);
+                            var halfWidth = laneWidth * lanes / 2 + 1;
+                            context.FillPolygon(
+                                roadColor,
+                                Offset(point1, offDir, halfWidth),
+                                Offset(point1, dir, -halfWidth),
+                                Offset(point1, offDir, -halfWidth),
+                                Offset(point2, offDir, -halfWidth),
+                                Offset(point2, dir, halfWidth),
+                                Offset(point2, offDir, halfWidth)
+                            );
+                        });
                     }
                 });
             });
@@ -173,14 +215,19 @@ namespace osm_road_overlay.Controllers
             }
         }
 
-        static void RenderWays(OverpassResponseElement[] ways, Dictionary<long, OverpassResponseElement> nodesById, Action<OverpassResponseElement, OverpassResponseElement, OverpassResponseElement> render)
+        static void RenderWays(OverpassResponseElement[] ways, Action<OverpassResponseElement> render)
         {
             foreach (var way in ways)
             {
-                for (var i = 1; i < way.nodes.Length; i++)
-                {
-                    render(way, nodesById[way.nodes[i - 1]], nodesById[way.nodes[i]]);
-                }
+                render(way);
+            }
+        }
+
+        static void RenderWaySegments(OverpassResponseElement way, Dictionary<long, OverpassResponseElement> nodesById, Action<OverpassResponseElement, OverpassResponseElement> render)
+        {
+            for (var i = 1; i < way.nodes.Length; i++)
+            {
+                render(nodesById[way.nodes[i - 1]], nodesById[way.nodes[i]]);
             }
         }
     }
