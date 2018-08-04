@@ -27,7 +27,7 @@ namespace osm_road_overlay.Controllers
             public double Lon;
         }
 
-        LatLon GetLatLonFromTile(int zoom, int x, int y) {
+        static LatLon GetLatLonFromTile(int zoom, int x, int y) {
             var n = Math.Pow(2, zoom);
             return new LatLon {
                 Lat = 180 / Math.PI * Math.Atan(Math.Sinh(Math.PI - (2 * Math.PI * y / n))),
@@ -35,20 +35,20 @@ namespace osm_road_overlay.Controllers
             };
         }
 
-        void GetLatLonBoxFromTile(int zoom, int x, int y, out LatLon nw, out LatLon se)
+        static void GetLatLonBoxFromTile(int zoom, int x, int y, out LatLon nw, out LatLon se)
         {
             nw = GetLatLonFromTile(zoom, x, y);
             se = GetLatLonFromTile(zoom, x + 1, y + 1);
         }
 
-        string GetBoundingBoxFromLatLonBox(LatLon nw, LatLon se, double oversize)
+        static string GetBoundingBoxFromLatLonBox(LatLon nw, LatLon se, double oversize)
         {
             var latExtra = oversize * (nw.Lat - se.Lat);
             var lonExtra = oversize * (se.Lon - nw.Lon);
             return $"{se.Lat - latExtra},{nw.Lon - lonExtra},{nw.Lat + latExtra},{se.Lon + lonExtra}";
         }
 
-        PointF GetPointFromNode(LatLon nw, LatLon se, OverpassResponseElement node) {
+        static PointF GetPointFromNode(LatLon nw, LatLon se, OverpassResponseElement node) {
             return new PointF(
                 (float)(256 * (node.lon - nw.Lon) / (se.Lon - nw.Lon)),
                 (float)(256 * (node.lat - nw.Lat) / (se.Lat - nw.Lat))
