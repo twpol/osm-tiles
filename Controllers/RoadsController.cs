@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -134,7 +134,7 @@ namespace osm_road_overlay.Controllers
 
             var C = 40075016.686;
             var imageScale = (C * Math.Cos(nw.Lat) / Math.Pow(2, zoom + 8));
-            var laneWidth = (float)(3 / imageScale);
+            var laneWidth = (float)(2 / imageScale);
 
             var kerbColor = new Rgba32(64, 64, 64);
             var roadColor = new Rgba32(192, 192, 192);
