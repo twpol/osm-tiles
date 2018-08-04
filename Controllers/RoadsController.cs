@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,6 +13,7 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Drawing;
+using SixLabors.ImageSharp.Processing.Drawing.Pens;
 using SixLabors.Primitives;
 
 namespace osm_road_overlay.Controllers
@@ -138,6 +139,10 @@ namespace osm_road_overlay.Controllers
 
             var kerbColor = new Rgba32(64, 64, 64);
             var roadColor = new Rgba32(192, 192, 192);
+            var laneLine = new Pen<Rgba32>(new Rgba32(255, 255, 255), 1, new float[] {
+                10,
+                5,
+            });
 
             var image = new Image<Rgba32>(256, 256);
             image.Mutate(context =>
@@ -181,6 +186,24 @@ namespace osm_road_overlay.Controllers
                                 Offset(point2, dir, halfWidth),
                                 Offset(point2, offDir, halfWidth)
                             );
+                        });
+                    }
+                });
+                RenderWays(ways, (way) => {
+                    var lanes = (float)GetLanes(way) - 2;
+                    if (lanes >= 0) {
+                        RenderWaySegments(way, nodesById, (node1, node2) => {
+                            var point1 = GetPointFromNode(nw, se, node1);
+                            var point2 = GetPointFromNode(nw, se, node2);
+                            var dir = Vector(point1, point2);
+                            var offDir = Flip(dir);
+                            for (var lane = -lanes / 2; lane <= lanes / 2; lane++) {
+                                context.DrawLines(
+                                    laneLine,
+                                    Offset(point1, offDir, laneWidth * lane),
+                                    Offset(point2, offDir, laneWidth * lane)
+                                );
+                            }
                         });
                     }
                 });
