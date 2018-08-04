@@ -162,15 +162,15 @@ namespace osm_road_overlay.Controllers
                             var offDir = Flip(dir);
                             var halfWidth = laneWidth * lanes.Sum() / 2 + 2;
                             var offsetLeft = halfWidth + (sidewalkLeft ? laneWidth / 2 : 0);
-                            var offsetRight = -halfWidth - (sidewalkRight ? laneWidth / 2 : 0);
+                            var offsetRight = halfWidth + (sidewalkRight ? laneWidth / 2 : 0);
                             context.FillPolygon(
                                 sidewalkColor,
-                                Offset(point1, offDir, offsetLeft),
+                                Offset(point1, offDir, -offsetLeft),
                                 Offset(point1, dir, -halfWidth),
                                 Offset(point1, offDir, offsetRight),
                                 Offset(point2, offDir, offsetRight),
                                 Offset(point2, dir, halfWidth),
-                                Offset(point2, offDir, offsetLeft)
+                                Offset(point2, offDir, -offsetLeft)
                             );
                         });
                     }
