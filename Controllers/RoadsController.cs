@@ -41,9 +41,11 @@ namespace osm_road_overlay.Controllers
             se = GetLatLonFromTile(zoom, x + 1, y + 1);
         }
 
-        string GetBoundingBoxFromLatLonBox(LatLon nw, LatLon se)
+        string GetBoundingBoxFromLatLonBox(LatLon nw, LatLon se, double oversize)
         {
-            return $"{se.Lat},{nw.Lon},{nw.Lat},{se.Lon}";
+            var latExtra = oversize * (nw.Lat - se.Lat);
+            var lonExtra = oversize * (se.Lon - nw.Lon);
+            return $"{se.Lat - latExtra},{nw.Lon - lonExtra},{nw.Lat + latExtra},{se.Lon + lonExtra}";
         }
 
         PointF GetPointFromNode(LatLon nw, LatLon se, OverpassResponseElement node) {
@@ -77,7 +79,7 @@ namespace osm_road_overlay.Controllers
             }
 
             GetLatLonBoxFromTile(zoom, x, y, out var nw, out var se);
-            var bbox = GetBoundingBoxFromLatLonBox(nw, se);
+            var bbox = GetBoundingBoxFromLatLonBox(nw, se, 0.5);
             var overpassQuery = $"[out:json][timeout:60];(way[\"highway\"]({bbox}););out body;>;out skel qt;";
 
             OverpassResponse overpass;
@@ -106,30 +108,40 @@ namespace osm_road_overlay.Controllers
                 })
             );
 
-            var image = new Image<Rgba32>(256, 256);
-            image.Mutate(context => {
-                context.DrawPolygon(
-                    new Rgba32(255, 0, 0),
-                    1,
-                    new PointF(0, 0),
-                    new PointF(256, 0),
-                    new PointF(256, 256),
-                    new PointF(0, 256),
-                    new PointF(0, 0)
-                );
+            var C = 40075016.686;
+            var imageScale = (C * Math.Cos(nw.Lat) / Math.Pow(2, zoom + 8));
+            var laneWidth = (float)(3 / imageScale);
 
-                foreach (var way in ways) {
-                    for (var i = 1; i < way.nodes.Length; i++) {
-                        var node1 = nodesById[way.nodes[i - 1]];
-                        var node2 = nodesById[way.nodes[i - 0]];
+            var kerbColor = new Rgba32(64, 64, 64);
+            var roadColor = new Rgba32(192, 192, 192);
+
+            var image = new Image<Rgba32>(256, 256);
+            image.Mutate(context =>
+            {
+                RenderWays(ways, nodesById, (way, node1, node2) =>
+                {
+                    var lanes = GetLanes(way);
+                    if (lanes > 0) {
                         context.DrawLines(
-                            new Rgba32(0, 0, 255),
-                            1,
+                            kerbColor,
+                            laneWidth * lanes + 1,
                             GetPointFromNode(nw, se, node1),
                             GetPointFromNode(nw, se, node2)
                         );
                     }
-                }
+                });
+                RenderWays(ways, nodesById, (way, node1, node2) =>
+                {
+                    var lanes = GetLanes(way);
+                    if (lanes > 0) {
+                        context.DrawLines(
+                            roadColor,
+                            laneWidth * lanes,
+                            GetPointFromNode(nw, se, node1),
+                            GetPointFromNode(nw, se, node2)
+                        );
+                    }
+                });
             });
 
             var stream = new MemoryStream();
@@ -137,6 +149,39 @@ namespace osm_road_overlay.Controllers
             stream.Position = 0;
 
             return File(stream, "image/png");
+        }
+
+        static int GetLanes(OverpassResponseElement way) {
+            switch (way.tags.GetValueOrDefault("highway", "no")) {
+                case "motorway":
+                case "trunk":
+                case "primary":
+                case "secondary":
+                case "tertiary":
+                case "unclassified":
+                case "residential":
+                case "service":
+                case "motorway_link":
+                case "trunk_link":
+                case "primary_link":
+                case "secondary_link":
+                case "tertiary_link":
+                    var defaultLanes = way.tags.GetValueOrDefault("oneway", "no") == "yes" ? "1" : "2";
+                    return int.Parse(way.tags.GetValueOrDefault("lanes", defaultLanes));
+                default:
+                    return 0;
+            }
+        }
+
+        static void RenderWays(OverpassResponseElement[] ways, Dictionary<long, OverpassResponseElement> nodesById, Action<OverpassResponseElement, OverpassResponseElement, OverpassResponseElement> render)
+        {
+            foreach (var way in ways)
+            {
+                for (var i = 1; i < way.nodes.Length; i++)
+                {
+                    render(way, nodesById[way.nodes[i - 1]], nodesById[way.nodes[i]]);
+                }
+            }
         }
     }
 }
