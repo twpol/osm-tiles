@@ -271,12 +271,15 @@ namespace osm_road_overlay.Controllers
             if (way.tags.GetValueOrDefault("cycleway", "no") == "lane") {
                 lanes.Insert(0, LaneWidthCycle);
                 lanes.Add(LaneWidthCycle);
-            } else if (way.tags.GetValueOrDefault("cycleway:left", "no") == "lane") {
-                lanes.Insert(0, LaneWidthCycle);
-            } else if (way.tags.GetValueOrDefault("cycleway:right", "no") == "lane") {
-                lanes.Add(LaneWidthCycle);
             } else if (way.tags.GetValueOrDefault("cycleway", "no") == "opposite") {
                 lanes.Add(LaneWidthCycle);
+            } else {
+                if (way.tags.GetValueOrDefault("cycleway:left", "no") == "lane") {
+                    lanes.Insert(0, LaneWidthCycle);
+                }
+                if (way.tags.GetValueOrDefault("cycleway:right", "no") == "lane") {
+                    lanes.Add(LaneWidthCycle);
+                }
             }
             return lanes;
         }
