@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using osm_road_overlay.Models.Overpass;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
@@ -50,7 +51,7 @@ namespace osm_road_overlay.Controllers.Overlays
             return $"{se.Lat - latExtra},{nw.Lon - lonExtra},{nw.Lat + latExtra},{se.Lon + lonExtra}";
         }
 
-        static PointF GetPointFromNode(LatLon nw, LatLon se, OverpassResponseElement node) {
+        static PointF GetPointFromNode(LatLon nw, LatLon se, Element node) {
             return new PointF(
                 (float)(256 * (node.lon - nw.Lon) / (se.Lon - nw.Lon)),
                 (float)(256 * (node.lat - nw.Lat) / (se.Lat - nw.Lat))
@@ -81,19 +82,6 @@ namespace osm_road_overlay.Controllers.Overlays
             };
         }
 
-        struct OverpassResponse {
-            public OverpassResponseElement[] elements;
-        }
-
-        struct OverpassResponseElement {
-            public string type;
-            public long id;
-            public double lat;
-            public double lon;
-            public long[] nodes;
-            public Dictionary<string, string> tags;
-        }
-
         readonly HttpClient Client = new HttpClient();
 
         // GET overlays/roads/:zoom/:x/:y.png
@@ -108,7 +96,7 @@ namespace osm_road_overlay.Controllers.Overlays
             var bbox = GetBoundingBoxFromLatLonBox(nw, se, 0.5);
             var overpassQuery = $"[out:json][timeout:60];(way[\"highway\"]({bbox}););out body;>;out skel qt;";
 
-            OverpassResponse overpass;
+            Response overpass;
             using (var overpassResponse = await Client.PostAsync(
                 OverpassAPIEndpoint,
                 new FormUrlEncodedContent(new Dictionary<string, string>() {
@@ -117,7 +105,7 @@ namespace osm_road_overlay.Controllers.Overlays
             ))
             using (var overpassReader = new StreamReader(await overpassResponse.Content.ReadAsStreamAsync()))
             using (var overpassJson = new JsonTextReader(overpassReader)) {
-                overpass = new JsonSerializer().Deserialize<OverpassResponse>(overpassJson);
+                overpass = new JsonSerializer().Deserialize<Response>(overpassJson);
                 // while (await overpassJson.ReadAsync()) {
                 //     Console.WriteLine($"JSON  {overpassJson.Path}  {overpassJson.TokenType}  {overpassJson.ValueType}  {overpassJson.Value}");
                 // }
@@ -125,9 +113,9 @@ namespace osm_road_overlay.Controllers.Overlays
 
             var ways = overpass.elements.Where(element => element.type == "way").ToArray();
             var nodes = overpass.elements.Where(element => element.type == "node").ToArray();
-            var nodesById = new Dictionary<long, OverpassResponseElement>(
+            var nodesById = new Dictionary<long, Element>(
                 nodes.Select(node => {
-                    return new KeyValuePair<long, OverpassResponseElement>(
+                    return new KeyValuePair<long, Element>(
                         node.id,
                         node
                     );
@@ -248,7 +236,7 @@ namespace osm_road_overlay.Controllers.Overlays
             return File(stream, "image/png");
         }
 
-        static List<float> GetLanes(OverpassResponseElement way) {
+        static List<float> GetLanes(Element way) {
             var lanes = new List<float>();
             var drivingLanes = GetDrivingLanes(way);
             if (drivingLanes == 0) {
@@ -286,7 +274,7 @@ namespace osm_road_overlay.Controllers.Overlays
             return lanes;
         }
 
-        static int GetDrivingLanes(OverpassResponseElement way) {
+        static int GetDrivingLanes(Element way) {
             switch (way.tags.GetValueOrDefault("highway", "no")) {
                 case "motorway":
                 case "trunk":
@@ -308,7 +296,7 @@ namespace osm_road_overlay.Controllers.Overlays
             }
         }
 
-        static float GetParkingLanes(OverpassResponseElement way, string side) {
+        static float GetParkingLanes(Element way, string side) {
             switch (way.tags.GetValueOrDefault("parking:lane" + side, "no")) {
                 case "parallel":
                     return 1;
@@ -321,7 +309,7 @@ namespace osm_road_overlay.Controllers.Overlays
             }
         }
 
-        static void RenderWays(OverpassResponseElement[] ways, Action<OverpassResponseElement> render)
+        static void RenderWays(Element[] ways, Action<Element> render)
         {
             foreach (var way in ways)
             {
@@ -335,7 +323,7 @@ namespace osm_road_overlay.Controllers.Overlays
             }
         }
 
-        static void RenderWaySegments(OverpassResponseElement way, Dictionary<long, OverpassResponseElement> nodesById, Action<OverpassResponseElement, OverpassResponseElement> render)
+        static void RenderWaySegments(Element way, Dictionary<long, Element> nodesById, Action<Element, Element> render)
         {
             for (var i = 1; i < way.nodes.Length; i++)
             {
