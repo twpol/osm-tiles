@@ -119,9 +119,7 @@ namespace osm_road_overlay.Controllers.Overlays
                 );
             }).ToArray();
 
-            var C = 40075016.686;
-            var imageScale = (C * Math.Cos(tile.NW.Lat) / Math.Pow(2, zoom + 8));
-            var laneWidth = (float)(2 / imageScale);
+            var laneWidth = (float)(2 * tile.ImageScale);
 
             var sidewalkColor = new Rgba32(128, 128, 128);
             var kerbColor = new Rgba32(64, 64, 64);
