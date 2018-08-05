@@ -68,6 +68,8 @@ namespace osm_road_overlay.Controllers.Overlays
                 return BadRequest();
             }
 
+            var start = DateTimeOffset.UtcNow;
+
             var tile = new Tile(zoom, x, y);
             await tile.LoadGeometry();
 
@@ -166,7 +168,8 @@ namespace osm_road_overlay.Controllers.Overlays
                 });
             });
 
-            Console.WriteLine($"{DateTimeOffset.Now}  Tile generated: {zoom}/{x}/{y}.png");
+            var end = DateTimeOffset.UtcNow;
+            Console.WriteLine($"{DateTimeOffset.Now}  Tile generated: {zoom}/{x}/{y}.png  Time taken: {(end - start).TotalMilliseconds:F0} ms");
 
             var stream = new MemoryStream();
             image.SaveAsPng(stream);
