@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,7 +21,7 @@ namespace osm_road_overlay.Controllers.Overlays
     [Route("overlays/roads")]
     public class RoadsController : Controller
     {
-        const string OverpassAPIEndpoint = "https://overpass-api.de/api/interpreter";
+        const string OverpassAPIEndpoint = "http://overpass-api.de/api/interpreter";
         const float LaneWidthCycle = 0.333f;
 
         struct LatLon {
