@@ -2,16 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using osm_road_overlay.Models.Geometry;
 using osm_road_overlay.Models.Overpass;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Drawing;
@@ -24,7 +19,6 @@ namespace osm_road_overlay.Controllers.Overlays
     [Route("overlays/roads")]
     public class RoadsController : Controller
     {
-        const string OverpassAPIEndpoint = "http://overpass-api.de/api/interpreter";
         const float LaneWidthCycle = 0.333f;
 
         static string GetBoundingBoxFromTile(Tile tile, double oversize)
@@ -65,8 +59,6 @@ namespace osm_road_overlay.Controllers.Overlays
             };
         }
 
-        readonly HttpClient Client = new HttpClient();
-
         // GET overlays/roads/:zoom/:x/:y.png
         [HttpGet("{zoom}/{x}/{y}.png")]
         public async Task<ActionResult> Get(int zoom, int x, int y)
@@ -78,21 +70,7 @@ namespace osm_road_overlay.Controllers.Overlays
             var tile = new Tile(zoom, x, y);
             var bbox = GetBoundingBoxFromTile(tile, 0.5);
             var overpassQuery = $"[out:json][timeout:60];(way[\"highway\"]({bbox}););out body;>;out skel qt;";
-
-            Response overpass;
-            using (var overpassResponse = await Client.PostAsync(
-                OverpassAPIEndpoint,
-                new FormUrlEncodedContent(new Dictionary<string, string>() {
-                    { "data", overpassQuery },
-                })
-            ))
-            using (var overpassReader = new StreamReader(await overpassResponse.Content.ReadAsStreamAsync()))
-            using (var overpassJson = new JsonTextReader(overpassReader)) {
-                overpass = new JsonSerializer().Deserialize<Response>(overpassJson);
-                // while (await overpassJson.ReadAsync()) {
-                //     Console.WriteLine($"JSON  {overpassJson.Path}  {overpassJson.TokenType}  {overpassJson.ValueType}  {overpassJson.Value}");
-                // }
-            }
+            var overpass = await Models.Overpass.Query.Get(overpassQuery);
 
             var ways = overpass.elements.Where(element => element.type == "way").ToArray();
             var nodes = overpass.elements.Where(element => element.type == "node").ToArray();
