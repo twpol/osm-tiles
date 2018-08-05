@@ -70,32 +70,7 @@ namespace osm_road_overlay.Controllers.Overlays
             var tile = new Tile(zoom, x, y);
             var bbox = GetBoundingBoxFromTile(tile, 0.5);
             var overpassQuery = $"[out:json][timeout:60];(way[\"highway\"]({bbox}););out body;>;out skel qt;";
-            var overpass = await Models.Overpass.Query.Get(overpassQuery);
-
-            var ways = overpass.elements.Where(element => element.type == "way").ToArray();
-            var nodes = overpass.elements.Where(element => element.type == "node").ToArray();
-            var nodesById = new Dictionary<long, Element>(
-                nodes.Select(node => {
-                    return new KeyValuePair<long, Element>(
-                        node.id,
-                        node
-                    );
-                })
-            );
-
-            // Convert Overpass data into geometry
-            var geoWays = ways.Select(way => {
-                var geoPoints = way.nodes.Select(nodeId => {
-                    var node = nodesById[nodeId];
-                    return new Point(node.lat, node.lon);
-                }).ToArray();
-                return new Way(
-                    way.tags,
-                    Enumerable.Range(0, geoPoints.Length - 1).Select(index => {
-                        return new Line(geoPoints[index], geoPoints[index + 1]);
-                    })
-                );
-            }).ToArray();
+            var world = await Models.Overpass.Query.GetGeometry(overpassQuery);
 
             var laneWidth = (float)(2 * tile.ImageScale);
 
@@ -110,7 +85,7 @@ namespace osm_road_overlay.Controllers.Overlays
             var image = new Image<Rgba32>(256, 256);
             image.Mutate(context =>
             {
-                RenderWays(geoWays, (way) => {
+                RenderWays(world, (way) => {
                     var lanes = GetLanes(way);
                     var sidewalk = way.Tags.GetValueOrDefault("sidewalk", "no");
                     var sidewalkLeft = sidewalk == "both" || sidewalk == "left";
@@ -136,7 +111,7 @@ namespace osm_road_overlay.Controllers.Overlays
                         });
                     }
                 });
-                RenderWays(geoWays, (way) => {
+                RenderWays(world, (way) => {
                     var lanes = GetLanes(way);
                     if (lanes.Count > 0) {
                         RenderWaySegments(way, (line) => {
@@ -157,7 +132,7 @@ namespace osm_road_overlay.Controllers.Overlays
                         });
                     }
                 });
-                RenderWays(geoWays, (way) => {
+                RenderWays(world, (way) => {
                     var lanes = GetLanes(way);
                     if (lanes.Count > 0) {
                         RenderWaySegments(way, (line) => {
@@ -178,7 +153,7 @@ namespace osm_road_overlay.Controllers.Overlays
                         });
                     }
                 });
-                RenderWays(geoWays, (way) => {
+                RenderWays(world, (way) => {
                     var lanes = GetLanes(way);
                     if (lanes.Count > 1) {
                         RenderWaySegments(way, (line) => {
@@ -282,9 +257,9 @@ namespace osm_road_overlay.Controllers.Overlays
             }
         }
 
-        static void RenderWays(IEnumerable<Way> ways, Action<Way> render)
+        static void RenderWays(World world, Action<Way> render)
         {
-            foreach (var way in ways)
+            foreach (var way in world.Ways)
             {
                 if (way.Tags.GetValueOrDefault("layer", "0") != "0") {
                     continue;
