@@ -19,14 +19,15 @@ namespace osm_road_overlay.Controllers.Overlays
     [Route("overlays/roads")]
     public class RoadsController : Controller
     {
-        const float LaneWidthCycle = 0.333f;
-
-        static string GetBoundingBoxFromTile(Tile tile, double oversize)
-        {
-            var latExtra = oversize * (tile.NW.Lat - tile.SE.Lat);
-            var lonExtra = oversize * (tile.SE.Lon - tile.NW.Lon);
-            return $"{tile.SE.Lat - latExtra},{tile.NW.Lon - lonExtra},{tile.NW.Lat + latExtra},{tile.SE.Lon + lonExtra}";
-        }
+        static readonly float LaneWidthCar = 1;
+        static readonly float LaneWidthCycle = 0.333f;
+        static readonly Rgba32 SidewalkColor = new Rgba32(128, 128, 128);
+        static readonly Rgba32 KerbColor = new Rgba32(64, 64, 64);
+        static readonly Rgba32 RoadColor = new Rgba32(192, 192, 192);
+        static readonly Pen<Rgba32> LaneLine = new Pen<Rgba32>(new Rgba32(255, 255, 255), 1, new float[] {
+            10,
+            5,
+        });
 
         static PointF GetPointFromNode(Tile tile, Point point) {
             return new PointF(
@@ -68,24 +69,14 @@ namespace osm_road_overlay.Controllers.Overlays
             }
 
             var tile = new Tile(zoom, x, y);
-            var bbox = GetBoundingBoxFromTile(tile, 0.5);
-            var overpassQuery = $"[out:json][timeout:60];(way[\"highway\"]({bbox}););out body;>;out skel qt;";
-            var world = await Models.Overpass.Query.GetGeometry(overpassQuery);
+            await tile.LoadGeometry();
 
             var laneWidth = (float)(2 * tile.ImageScale);
-
-            var sidewalkColor = new Rgba32(128, 128, 128);
-            var kerbColor = new Rgba32(64, 64, 64);
-            var roadColor = new Rgba32(192, 192, 192);
-            var laneLine = new Pen<Rgba32>(new Rgba32(255, 255, 255), 1, new float[] {
-                10,
-                5,
-            });
 
             var image = new Image<Rgba32>(256, 256);
             image.Mutate(context =>
             {
-                RenderWays(world, (way) => {
+                RenderWays(tile, (way) => {
                     var lanes = GetLanes(way);
                     var sidewalk = way.Tags.GetValueOrDefault("sidewalk", "no");
                     var sidewalkLeft = sidewalk == "both" || sidewalk == "left";
@@ -100,7 +91,7 @@ namespace osm_road_overlay.Controllers.Overlays
                             var offsetLeft = halfWidth + (sidewalkLeft ? laneWidth / 2 : 0);
                             var offsetRight = halfWidth + (sidewalkRight ? laneWidth / 2 : 0);
                             context.FillPolygon(
-                                sidewalkColor,
+                                SidewalkColor,
                                 Offset(point1, offDir, -offsetLeft),
                                 Offset(point1, dir, -halfWidth),
                                 Offset(point1, offDir, offsetRight),
@@ -111,7 +102,7 @@ namespace osm_road_overlay.Controllers.Overlays
                         });
                     }
                 });
-                RenderWays(world, (way) => {
+                RenderWays(tile, (way) => {
                     var lanes = GetLanes(way);
                     if (lanes.Count > 0) {
                         RenderWaySegments(way, (line) => {
@@ -121,7 +112,7 @@ namespace osm_road_overlay.Controllers.Overlays
                             var offDir = Flip(dir);
                             var halfWidth = laneWidth * lanes.Sum() / 2 + 2;
                             context.FillPolygon(
-                                kerbColor,
+                                KerbColor,
                                 Offset(point1, offDir, halfWidth),
                                 Offset(point1, dir, -halfWidth),
                                 Offset(point1, offDir, -halfWidth),
@@ -132,7 +123,7 @@ namespace osm_road_overlay.Controllers.Overlays
                         });
                     }
                 });
-                RenderWays(world, (way) => {
+                RenderWays(tile, (way) => {
                     var lanes = GetLanes(way);
                     if (lanes.Count > 0) {
                         RenderWaySegments(way, (line) => {
@@ -142,7 +133,7 @@ namespace osm_road_overlay.Controllers.Overlays
                             var offDir = Flip(dir);
                             var halfWidth = laneWidth * lanes.Sum() / 2 + 1;
                             context.FillPolygon(
-                                roadColor,
+                                RoadColor,
                                 Offset(point1, offDir, halfWidth),
                                 Offset(point1, dir, -halfWidth),
                                 Offset(point1, offDir, -halfWidth),
@@ -153,7 +144,7 @@ namespace osm_road_overlay.Controllers.Overlays
                         });
                     }
                 });
-                RenderWays(world, (way) => {
+                RenderWays(tile, (way) => {
                     var lanes = GetLanes(way);
                     if (lanes.Count > 1) {
                         RenderWaySegments(way, (line) => {
@@ -165,7 +156,7 @@ namespace osm_road_overlay.Controllers.Overlays
                             for (var laneIndex = 0; laneIndex < lanes.Count - 1; laneIndex++) {
                                 laneOffset += lanes[laneIndex];
                                 context.DrawLines(
-                                    laneLine,
+                                    LaneLine,
                                     Offset(point1, offDir, laneWidth * laneOffset),
                                     Offset(point2, offDir, laneWidth * laneOffset)
                                 );
@@ -191,7 +182,7 @@ namespace osm_road_overlay.Controllers.Overlays
                 return lanes;
             }
             for (var i = 0; i < drivingLanes; i++) {
-                lanes.Add(1);
+                lanes.Add(LaneWidthCar);
             }
             var parkingLeftLanes = GetParkingLanes(way, ":left");
             if (parkingLeftLanes > 0) {
@@ -222,7 +213,7 @@ namespace osm_road_overlay.Controllers.Overlays
             return lanes;
         }
 
-        static int GetDrivingLanes(Way way) {
+        static float GetDrivingLanes(Way way) {
             switch (way.Tags.GetValueOrDefault("highway", "no")) {
                 case "motorway":
                 case "trunk":
@@ -238,7 +229,7 @@ namespace osm_road_overlay.Controllers.Overlays
                 case "secondary_link":
                 case "tertiary_link":
                     var defaultLanes = way.Tags.GetValueOrDefault("oneway", "no") == "yes" ? "1" : "2";
-                    return int.Parse(way.Tags.GetValueOrDefault("lanes", defaultLanes));
+                    return LaneWidthCar * int.Parse(way.Tags.GetValueOrDefault("lanes", defaultLanes));
                 default:
                     return 0;
             }
@@ -247,19 +238,19 @@ namespace osm_road_overlay.Controllers.Overlays
         static float GetParkingLanes(Way way, string side) {
             switch (way.Tags.GetValueOrDefault("parking:lane" + side, "no")) {
                 case "parallel":
-                    return 1;
+                    return LaneWidthCar;
                 case "diagonal":
-                    return 1.5f;
+                    return LaneWidthCar * 1.5f;
                 case "perpendicular":
-                    return 2;
+                    return LaneWidthCar * 2;
                 default:
                     return 0;
             }
         }
 
-        static void RenderWays(World world, Action<Way> render)
+        static void RenderWays(Tile tile, Action<Way> render)
         {
-            foreach (var way in world.Ways)
+            foreach (var way in tile.Ways)
             {
                 if (way.Tags.GetValueOrDefault("layer", "0") != "0") {
                     continue;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,7 +29,7 @@ namespace osm_road_overlay.Models.Overpass
             }
         }
 
-        public static async Task<World> GetGeometry(string overpassQuery)
+        public static async Task<Way[]> GetGeometry(string overpassQuery)
         {
             var overpass = await Get(overpassQuery);
             var overpassWays = overpass.elements.Where(element => element.type == "way").ToArray();
@@ -55,7 +56,7 @@ namespace osm_road_overlay.Models.Overpass
                 );
             }).ToArray();
 
-            return new World(ways);
+            return ways;
         }
     }
 }
