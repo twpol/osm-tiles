@@ -16,9 +16,9 @@ using SixLabors.ImageSharp.Processing.Drawing;
 using SixLabors.ImageSharp.Processing.Drawing.Pens;
 using SixLabors.Primitives;
 
-namespace osm_road_overlay.Controllers
+namespace osm_road_overlay.Controllers.Overlays
 {
-    [Route("[controller]")]
+    [Route("overlays/roads")]
     public class RoadsController : Controller
     {
         const string OverpassAPIEndpoint = "https://overpass-api.de/api/interpreter";
@@ -96,7 +96,7 @@ namespace osm_road_overlay.Controllers
 
         readonly HttpClient Client = new HttpClient();
 
-        // GET roads/:zoom/:x/:y.png
+        // GET overlays/roads/:zoom/:x/:y.png
         [HttpGet("{zoom}/{x}/{y}.png")]
         public async Task<ActionResult> Get(int zoom, int x, int y)
         {
