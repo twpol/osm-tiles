@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace osm_road_overlay.Geometry
+namespace osm_road_overlay.Models.Geometry
 {
     public class Way
     {

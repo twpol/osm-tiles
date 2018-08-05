@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using osm_road_overlay.Models.Geometry;
 using osm_road_overlay.Models.Overpass;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
@@ -15,7 +16,8 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Drawing;
 using SixLabors.ImageSharp.Processing.Drawing.Pens;
-using SixLabors.Primitives;
+using PointF = SixLabors.Primitives.PointF;
+using SizeF = SixLabors.Primitives.SizeF;
 
 namespace osm_road_overlay.Controllers.Overlays
 {
@@ -25,36 +27,17 @@ namespace osm_road_overlay.Controllers.Overlays
         const string OverpassAPIEndpoint = "http://overpass-api.de/api/interpreter";
         const float LaneWidthCycle = 0.333f;
 
-        struct LatLon {
-            public double Lat;
-            public double Lon;
-        }
-
-        static LatLon GetLatLonFromTile(int zoom, int x, int y) {
-            var n = Math.Pow(2, zoom);
-            return new LatLon {
-                Lat = 180 / Math.PI * Math.Atan(Math.Sinh(Math.PI - (2 * Math.PI * y / n))),
-                Lon = (x / n * 360) - 180,
-            };
-        }
-
-        static void GetLatLonBoxFromTile(int zoom, int x, int y, out LatLon nw, out LatLon se)
+        static string GetBoundingBoxFromTile(Tile tile, double oversize)
         {
-            nw = GetLatLonFromTile(zoom, x, y);
-            se = GetLatLonFromTile(zoom, x + 1, y + 1);
+            var latExtra = oversize * (tile.NW.Lat - tile.SE.Lat);
+            var lonExtra = oversize * (tile.SE.Lon - tile.NW.Lon);
+            return $"{tile.SE.Lat - latExtra},{tile.NW.Lon - lonExtra},{tile.NW.Lat + latExtra},{tile.SE.Lon + lonExtra}";
         }
 
-        static string GetBoundingBoxFromLatLonBox(LatLon nw, LatLon se, double oversize)
-        {
-            var latExtra = oversize * (nw.Lat - se.Lat);
-            var lonExtra = oversize * (se.Lon - nw.Lon);
-            return $"{se.Lat - latExtra},{nw.Lon - lonExtra},{nw.Lat + latExtra},{se.Lon + lonExtra}";
-        }
-
-        static PointF GetPointFromNode(LatLon nw, LatLon se, Geometry.Point point) {
+        static PointF GetPointFromNode(Tile tile, Point point) {
             return new PointF(
-                (float)(256 * (point.Lon - nw.Lon) / (se.Lon - nw.Lon)),
-                (float)(256 * (point.Lat - nw.Lat) / (se.Lat - nw.Lat))
+                (float)(256 * (point.Lon - tile.NW.Lon) / (tile.SE.Lon - tile.NW.Lon)),
+                (float)(256 * (point.Lat - tile.NW.Lat) / (tile.SE.Lat - tile.NW.Lat))
             );
         }
 
@@ -92,8 +75,8 @@ namespace osm_road_overlay.Controllers.Overlays
                 return BadRequest();
             }
 
-            GetLatLonBoxFromTile(zoom, x, y, out var nw, out var se);
-            var bbox = GetBoundingBoxFromLatLonBox(nw, se, 0.5);
+            var tile = new Tile(zoom, x, y);
+            var bbox = GetBoundingBoxFromTile(tile, 0.5);
             var overpassQuery = $"[out:json][timeout:60];(way[\"highway\"]({bbox}););out body;>;out skel qt;";
 
             Response overpass;
@@ -126,18 +109,18 @@ namespace osm_road_overlay.Controllers.Overlays
             var geoWays = ways.Select(way => {
                 var geoPoints = way.nodes.Select(nodeId => {
                     var node = nodesById[nodeId];
-                    return new Geometry.Point(node.lat, node.lon);
+                    return new Point(node.lat, node.lon);
                 }).ToArray();
-                return new Geometry.Way(
+                return new Way(
                     way.tags,
                     Enumerable.Range(0, geoPoints.Length - 1).Select(index => {
-                        return new Geometry.Line(geoPoints[index], geoPoints[index + 1]);
+                        return new Line(geoPoints[index], geoPoints[index + 1]);
                     })
                 );
             }).ToArray();
 
             var C = 40075016.686;
-            var imageScale = (C * Math.Cos(nw.Lat) / Math.Pow(2, zoom + 8));
+            var imageScale = (C * Math.Cos(tile.NW.Lat) / Math.Pow(2, zoom + 8));
             var laneWidth = (float)(2 / imageScale);
 
             var sidewalkColor = new Rgba32(128, 128, 128);
@@ -158,8 +141,8 @@ namespace osm_road_overlay.Controllers.Overlays
                     var sidewalkRight = sidewalk == "both" || sidewalk == "right";
                     if (lanes.Count > 0 && (sidewalkLeft || sidewalkRight)) {
                         RenderWaySegments(way, (line) => {
-                            var point1 = GetPointFromNode(nw, se, line.Start);
-                            var point2 = GetPointFromNode(nw, se, line.End);
+                            var point1 = GetPointFromNode(tile, line.Start);
+                            var point2 = GetPointFromNode(tile, line.End);
                             var dir = Vector(point1, point2);
                             var offDir = Flip(dir);
                             var halfWidth = laneWidth * lanes.Sum() / 2 + 2;
@@ -181,8 +164,8 @@ namespace osm_road_overlay.Controllers.Overlays
                     var lanes = GetLanes(way);
                     if (lanes.Count > 0) {
                         RenderWaySegments(way, (line) => {
-                            var point1 = GetPointFromNode(nw, se, line.Start);
-                            var point2 = GetPointFromNode(nw, se, line.End);
+                            var point1 = GetPointFromNode(tile, line.Start);
+                            var point2 = GetPointFromNode(tile, line.End);
                             var dir = Vector(point1, point2);
                             var offDir = Flip(dir);
                             var halfWidth = laneWidth * lanes.Sum() / 2 + 2;
@@ -202,8 +185,8 @@ namespace osm_road_overlay.Controllers.Overlays
                     var lanes = GetLanes(way);
                     if (lanes.Count > 0) {
                         RenderWaySegments(way, (line) => {
-                            var point1 = GetPointFromNode(nw, se, line.Start);
-                            var point2 = GetPointFromNode(nw, se, line.End);
+                            var point1 = GetPointFromNode(tile, line.Start);
+                            var point2 = GetPointFromNode(tile, line.End);
                             var dir = Vector(point1, point2);
                             var offDir = Flip(dir);
                             var halfWidth = laneWidth * lanes.Sum() / 2 + 1;
@@ -223,8 +206,8 @@ namespace osm_road_overlay.Controllers.Overlays
                     var lanes = GetLanes(way);
                     if (lanes.Count > 1) {
                         RenderWaySegments(way, (line) => {
-                            var point1 = GetPointFromNode(nw, se, line.Start);
-                            var point2 = GetPointFromNode(nw, se, line.End);
+                            var point1 = GetPointFromNode(tile, line.Start);
+                            var point2 = GetPointFromNode(tile, line.End);
                             var dir = Vector(point1, point2);
                             var offDir = Flip(dir);
                             var laneOffset = -lanes.Sum() / 2;
@@ -250,7 +233,7 @@ namespace osm_road_overlay.Controllers.Overlays
             return File(stream, "image/png");
         }
 
-        static List<float> GetLanes(Geometry.Way way) {
+        static List<float> GetLanes(Way way) {
             var lanes = new List<float>();
             var drivingLanes = GetDrivingLanes(way);
             if (drivingLanes == 0) {
@@ -288,7 +271,7 @@ namespace osm_road_overlay.Controllers.Overlays
             return lanes;
         }
 
-        static int GetDrivingLanes(Geometry.Way way) {
+        static int GetDrivingLanes(Way way) {
             switch (way.Tags.GetValueOrDefault("highway", "no")) {
                 case "motorway":
                 case "trunk":
@@ -310,7 +293,7 @@ namespace osm_road_overlay.Controllers.Overlays
             }
         }
 
-        static float GetParkingLanes(Geometry.Way way, string side) {
+        static float GetParkingLanes(Way way, string side) {
             switch (way.Tags.GetValueOrDefault("parking:lane" + side, "no")) {
                 case "parallel":
                     return 1;
@@ -323,7 +306,7 @@ namespace osm_road_overlay.Controllers.Overlays
             }
         }
 
-        static void RenderWays(IEnumerable<Geometry.Way> ways, Action<Geometry.Way> render)
+        static void RenderWays(IEnumerable<Way> ways, Action<Way> render)
         {
             foreach (var way in ways)
             {
@@ -337,7 +320,7 @@ namespace osm_road_overlay.Controllers.Overlays
             }
         }
 
-        static void RenderWaySegments(Geometry.Way way, Action<Geometry.Line> render)
+        static void RenderWaySegments(Way way, Action<Line> render)
         {
             foreach (var segment in way.Segments)
             {
