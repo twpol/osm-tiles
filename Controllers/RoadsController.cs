@@ -239,6 +239,8 @@ namespace osm_road_overlay.Controllers
                 });
             });
 
+            Console.WriteLine($"{DateTimeOffset.Now}  Tile generated: {zoom}/{x}/{y}.png");
+
             var stream = new MemoryStream();
             image.SaveAsPng(stream);
             stream.Position = 0;
