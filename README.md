@@ -23,6 +23,10 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 - Only `layer=0` or `!layer` ways are rendered for now.
 - Only zoom level 18 is supported for now.
 
+### Current rendering
+
+![Example tile](Documentation/example-tile-road-overlay.png)
+
 ## Notes
 
 - Each tile is rendered on-demand, nothing is cached.
