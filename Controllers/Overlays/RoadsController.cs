@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -325,6 +325,12 @@ namespace osm_road_overlay.Controllers.Overlays
         {
             foreach (var way in ways)
             {
+                if (way.tags.GetValueOrDefault("layer", "0") != "0") {
+                    continue;
+                }
+                if (way.tags.GetValueOrDefault("area", "no") == "yes") {
+                    continue;
+                }
                 render(way);
             }
         }
