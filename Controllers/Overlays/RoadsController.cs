@@ -64,7 +64,7 @@ namespace osm_road_overlay.Controllers.Overlays
         [HttpGet("{zoom}/{x}/{y}.png")]
         public async Task<ActionResult> Get(int zoom, int x, int y)
         {
-            if (zoom < 18) {
+            if (zoom < 16 || zoom > 22) {
                 return BadRequest();
             }
 

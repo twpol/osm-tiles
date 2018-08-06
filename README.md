@@ -21,7 +21,7 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 ### Limitations
 
 - Only `layer=0` or `!layer` ways are rendered for now.
-- Only zoom level 18 is supported for now.
+- Only zoom levels 16 through 22 are supported.
 
 ### Current rendering
 

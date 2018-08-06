@@ -22,7 +22,8 @@ namespace osm_road_overlay.Models.Geometry
 
         public async Task LoadGeometry()
         {
-            var bbox = GetBoundingBoxFromTile(this, 0.5);
+            // Gather the bounding box with 20m extra around it for capturing edges.
+            var bbox = GetBoundingBoxFromTile(this, 20 * ImageScale / 256);
             var overpassQuery = $"[out:json][timeout:60];(way[\"highway\"]({bbox}););out body;>;out skel qt;";
             Ways = ImmutableList.ToImmutableList(await Models.Overpass.Query.GetGeometry(overpassQuery));
         }
@@ -36,10 +37,10 @@ namespace osm_road_overlay.Models.Geometry
             );
         }
 
-        static string GetBoundingBoxFromTile(Tile tile, double oversize)
+        static string GetBoundingBoxFromTile(Tile tile, double oversizeScale)
         {
-            var latExtra = oversize * (tile.NW.Lat - tile.SE.Lat);
-            var lonExtra = oversize * (tile.SE.Lon - tile.NW.Lon);
+            var latExtra = oversizeScale * (tile.NW.Lat - tile.SE.Lat);
+            var lonExtra = oversizeScale * (tile.SE.Lon - tile.NW.Lon);
             return $"{tile.SE.Lat - latExtra},{tile.NW.Lon - lonExtra},{tile.NW.Lat + latExtra},{tile.SE.Lon + lonExtra}";
         }
     }
