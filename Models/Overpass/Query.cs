@@ -22,10 +22,12 @@ namespace osm_road_overlay.Models.Overpass
                 new FormUrlEncodedContent(new Dictionary<string, string>() {
                     { "data", overpassQuery },
                 })
-            ))
-            using (var overpassReader = new StreamReader(await overpassResponse.Content.ReadAsStreamAsync()))
-            using (var overpassJson = new JsonTextReader(overpassReader)) {
-                return new JsonSerializer().Deserialize<Response>(overpassJson);
+            )) {
+                overpassResponse.EnsureSuccessStatusCode();
+                using (var overpassReader = new StreamReader(await overpassResponse.Content.ReadAsStreamAsync()))
+                using (var overpassJson = new JsonTextReader(overpassReader)) {
+                    return new JsonSerializer().Deserialize<Response>(overpassJson);
+                }
             }
         }
 
