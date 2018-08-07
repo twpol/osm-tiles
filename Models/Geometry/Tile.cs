@@ -8,6 +8,9 @@ namespace osm_road_overlay.Models.Geometry
     {
         const double C = 40075016.686;
 
+        public int Zoom { get; }
+        public int X { get; }
+        public int Y { get; }
         public Point NW { get; }
         public Point SE { get; }
         public double ImageScale { get; }
@@ -15,6 +18,9 @@ namespace osm_road_overlay.Models.Geometry
 
         public Tile(int zoom, int x, int y)
         {
+            Zoom = zoom;
+            X = x;
+            Y = y;
             NW = GetPointFromTile(zoom, x, y);
             SE = GetPointFromTile(zoom, x + 1, y + 1);
             ImageScale = 1 / (C * Math.Cos(NW.Lat) / Math.Pow(2, zoom + 8));
@@ -22,10 +28,12 @@ namespace osm_road_overlay.Models.Geometry
 
         public async Task LoadGeometry()
         {
-            // Gather the bounding box with 20m extra around it for capturing edges.
-            var bbox = GetBoundingBoxFromTile(this, 20 * ImageScale / 256);
-            var overpassQuery = $"[out:json][timeout:60];(way[\"highway\"]({bbox}););out body;>;out skel qt;";
-            Ways = ImmutableList.ToImmutableList(await Models.Overpass.Query.GetGeometry(overpassQuery));
+            Ways = ImmutableList.ToImmutableList(await Models.Overpass.Query.GetGeometry(this));
+        }
+
+        override public string ToString()
+        {
+            return $"Tile({Zoom}, {X}, {Y})";
         }
 
         static Point GetPointFromTile(int zoom, int x, int y)
@@ -35,13 +43,6 @@ namespace osm_road_overlay.Models.Geometry
                 180 / Math.PI * Math.Atan(Math.Sinh(Math.PI - (2 * Math.PI * y / n))),
                 (x / n * 360) - 180
             );
-        }
-
-        static string GetBoundingBoxFromTile(Tile tile, double oversizeScale)
-        {
-            var latExtra = oversizeScale * (tile.NW.Lat - tile.SE.Lat);
-            var lonExtra = oversizeScale * (tile.SE.Lon - tile.NW.Lon);
-            return $"{tile.SE.Lat - latExtra},{tile.NW.Lon - lonExtra},{tile.NW.Lat + latExtra},{tile.SE.Lon + lonExtra}";
         }
     }
 }

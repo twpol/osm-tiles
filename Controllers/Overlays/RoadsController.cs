@@ -169,7 +169,7 @@ namespace osm_road_overlay.Controllers.Overlays
             });
 
             var end = DateTimeOffset.UtcNow;
-            Console.WriteLine($"overlays/roads/{zoom}/{x}/{y}.png = {(end - start).TotalMilliseconds:F0} ms");
+            Console.WriteLine($"Rendered {tile} in {(end - start).TotalMilliseconds:F0} ms");
 
             var stream = new MemoryStream();
             image.SaveAsPng(stream);
