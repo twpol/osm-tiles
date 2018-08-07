@@ -25,7 +25,39 @@
 <body>
     <div id="map"></div>
     <script>
-        var map = L.map('map').setView([51.505, -0.09], 16);
+        function setUrlFromMapView(map) {
+            history.pushState(null, document.title, [
+                '?map=',
+                map.getZoom(),
+                '/',
+                map.getCenter().lat.toFixed(6),
+                '/',
+                map.getCenter().lng.toFixed(6),
+            ].join(''));
+        }
+
+        function setMapViewFromUrl(map) {
+            try {
+                var view = location.search.substr(1).split('&').filter(function (param) {
+                    return param.indexOf('map=') === 0;
+                });
+                var viewParts = view[0].substr(4).split('/');
+                map.setView([+viewParts[1], +viewParts[2]], +viewParts[0]);
+            } catch(error) {
+                map.setView([51.505, -0.09], 16);
+            }
+        }
+
+        var map = L.map('map');
+        setMapViewFromUrl(map);
+
+        document.addEventListener('popstate', function () {
+            setMapViewFromUrl(map);
+        });
+
+        map.on('moveend zoomend', function () {
+            setUrlFromMapView(map);
+        });
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
