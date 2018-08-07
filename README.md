@@ -4,6 +4,10 @@ A tile renderer for OpenStreetMap that provides the following tile sets:
 
 - Road overlay
 
+## Live slippy map and tile server
+
+A live version is running at https://osm-tiles.james-ross.co.uk/.
+
 ## Road overlay
 
 This tile set is an overlay (meaning the tiles are transparent where there is no data) which renders roads (highways) from OpenStreetMap according to their various tags, including:
@@ -29,18 +33,10 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 
 ## Notes
 
-- Each tile is rendered on-demand, nothing is cached.
-- Each tile will make an Overpass API query to fetch the OpenStreetMap data needed.
-
-## Live tile server
-
-A live tile server is running at https://osm-tiles.james-ross.co.uk/ (nothing to see there yet). To use the tile sets, add the following TMS URLs to your map:
-
-- https://osm-tiles.james-ross.co.uk/overlays/roads/{zoom}/{x}/{y}.png
+- Each tile is rendered on-demand, but the underlying data is cached in memory in zoom level 14 chunks.
 
 ## To do
 
-- Add example use of tile server at https://osm-tiles.james-ross.co.uk/ with a slippy map.
 - Separation and correction of way end nodes at junctions (to align lanes)
 - Calculations for `layer!=0`, bridges, tunnels
 - Calculations for bus, PSV (public service vehicle), other specialised lanes
