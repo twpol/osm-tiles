@@ -50,8 +50,9 @@
 
         var map = L.map('map');
         setMapViewFromUrl(map);
+        setUrlFromMapView(map);
 
-        document.addEventListener('popstate', function () {
+        window.addEventListener('popstate', function () {
             setMapViewFromUrl(map);
         });
 
