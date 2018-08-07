@@ -40,6 +40,7 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 - Separation and correction of way end nodes at junctions (to align lanes)
 - Calculations for `layer!=0`, bridges, tunnels
 - Calculations for bus, PSV (public service vehicle), other specialised lanes
+- Calculations for `placement=*`
 - Calculations using turn lane markings
 - Calculations for `width`
 - Display tapering of road width/lanes
