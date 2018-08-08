@@ -19,8 +19,9 @@ namespace osm_road_overlay.Controllers.Overlays
     [Route("overlays/roads")]
     public class RoadsController : Controller
     {
-        static readonly float LaneWidthCar = 1;
-        static readonly float LaneWidthCycle = 0.333f;
+        static readonly float LaneWidthSidewalk = 2.0f;
+        static readonly float LaneWidthCar = 3.0f;
+        static readonly float LaneWidthCycle = 1.0f;
         static readonly Rgba32 SidewalkColor = new Rgba32(128, 128, 128);
         static readonly Rgba32 KerbColor = new Rgba32(64, 64, 64);
         static readonly Rgba32 RoadColor = new Rgba32(192, 192, 192);
@@ -73,8 +74,6 @@ namespace osm_road_overlay.Controllers.Overlays
             var tile = new Tile(zoom, x, y);
             await tile.LoadGeometry();
 
-            var laneWidth = (float)(2 * tile.ImageScale);
-
             var image = new Image<Rgba32>(256, 256);
             image.Mutate(context =>
             {
@@ -89,9 +88,9 @@ namespace osm_road_overlay.Controllers.Overlays
                             var point2 = GetPointFromNode(tile, line.End);
                             var dir = Vector(point1, point2);
                             var offDir = Flip(dir);
-                            var halfWidth = laneWidth * lanes.Sum() / 2 + 2;
-                            var offsetLeft = halfWidth + (sidewalkLeft ? laneWidth / 2 : 0);
-                            var offsetRight = halfWidth + (sidewalkRight ? laneWidth / 2 : 0);
+                            var halfWidth = tile.ImageScale * lanes.Sum() / 2 + 2;
+                            var offsetLeft = halfWidth + (sidewalkLeft ? tile.ImageScale * LaneWidthSidewalk : 0);
+                            var offsetRight = halfWidth + (sidewalkRight ? tile.ImageScale * LaneWidthSidewalk : 0);
                             context.FillPolygon(
                                 SidewalkColor,
                                 Offset(point1, offDir, -offsetLeft),
@@ -112,7 +111,7 @@ namespace osm_road_overlay.Controllers.Overlays
                             var point2 = GetPointFromNode(tile, line.End);
                             var dir = Vector(point1, point2);
                             var offDir = Flip(dir);
-                            var halfWidth = laneWidth * lanes.Sum() / 2 + 2;
+                            var halfWidth = tile.ImageScale * lanes.Sum() / 2 + 2;
                             context.FillPolygon(
                                 KerbColor,
                                 Offset(point1, offDir, halfWidth),
@@ -133,7 +132,7 @@ namespace osm_road_overlay.Controllers.Overlays
                             var point2 = GetPointFromNode(tile, line.End);
                             var dir = Vector(point1, point2);
                             var offDir = Flip(dir);
-                            var halfWidth = laneWidth * lanes.Sum() / 2 + 1;
+                            var halfWidth = tile.ImageScale * lanes.Sum() / 2 + 1;
                             context.FillPolygon(
                                 RoadColor,
                                 Offset(point1, offDir, halfWidth),
@@ -159,8 +158,8 @@ namespace osm_road_overlay.Controllers.Overlays
                                 laneOffset += lanes[laneIndex];
                                 context.DrawLines(
                                     LaneLine,
-                                    Offset(point1, offDir, laneWidth * laneOffset),
-                                    Offset(point2, offDir, laneWidth * laneOffset)
+                                    Offset(point1, offDir, tile.ImageScale * laneOffset),
+                                    Offset(point2, offDir, tile.ImageScale * laneOffset)
                                 );
                             }
                         });
@@ -180,22 +179,22 @@ namespace osm_road_overlay.Controllers.Overlays
 
         static List<float> GetLanes(Way way) {
             var lanes = new List<float>();
-            var drivingLanes = GetDrivingLanes(way);
+            var drivingLanes = GetNumberOfDrivingLanes(way);
             if (drivingLanes == 0) {
                 return lanes;
             }
             for (var i = 0; i < drivingLanes; i++) {
                 lanes.Add(LaneWidthCar);
             }
-            var parkingLeftLanes = GetParkingLanes(way, ":left");
+            var parkingLeftLanes = GetWidthOfParkingLanes(way, ":left");
             if (parkingLeftLanes > 0) {
                 lanes.Insert(0, parkingLeftLanes);
             }
-            var parkingRightLanes = GetParkingLanes(way, ":right");
+            var parkingRightLanes = GetWidthOfParkingLanes(way, ":right");
             if (parkingRightLanes > 0) {
                 lanes.Add(parkingRightLanes);
             }
-            var parkingBothLanes = GetParkingLanes(way, ":both");
+            var parkingBothLanes = GetWidthOfParkingLanes(way, ":both");
             if (parkingBothLanes > 0) {
                 lanes.Insert(0, parkingBothLanes);
                 lanes.Add(parkingBothLanes);
@@ -216,7 +215,7 @@ namespace osm_road_overlay.Controllers.Overlays
             return lanes;
         }
 
-        static float GetDrivingLanes(Way way) {
+        static int GetNumberOfDrivingLanes(Way way) {
             switch (way.Tags.GetValueOrDefault("highway", "no")) {
                 case "motorway":
                 case "trunk":
@@ -232,13 +231,13 @@ namespace osm_road_overlay.Controllers.Overlays
                 case "secondary_link":
                 case "tertiary_link":
                     var defaultLanes = way.Tags.GetValueOrDefault("oneway", "no") == "yes" ? "1" : "2";
-                    return LaneWidthCar * int.Parse(way.Tags.GetValueOrDefault("lanes", defaultLanes));
+                    return int.Parse(way.Tags.GetValueOrDefault("lanes", defaultLanes));
                 default:
                     return 0;
             }
         }
 
-        static float GetParkingLanes(Way way, string side) {
+        static float GetWidthOfParkingLanes(Way way, string side) {
             switch (way.Tags.GetValueOrDefault("parking:lane" + side, "no")) {
                 case "parallel":
                     return LaneWidthCar;

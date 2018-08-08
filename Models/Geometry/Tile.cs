@@ -13,7 +13,7 @@ namespace osm_road_overlay.Models.Geometry
         public int Y { get; }
         public Point NW { get; }
         public Point SE { get; }
-        public double ImageScale { get; }
+        public float ImageScale { get; }
         public ImmutableList<Way> Ways { get; private set; }
 
         public Tile(int zoom, int x, int y)
@@ -23,7 +23,7 @@ namespace osm_road_overlay.Models.Geometry
             Y = y;
             NW = GetPointFromTile(zoom, x, y);
             SE = GetPointFromTile(zoom, x + 1, y + 1);
-            ImageScale = 1 / (C * Math.Cos(NW.Lat) / Math.Pow(2, zoom + 8));
+            ImageScale = (float)(1 / (C * Math.Cos(NW.Lat * Math.PI / 180) / Math.Pow(2, zoom + 8)));
         }
 
         public async Task LoadGeometry()
