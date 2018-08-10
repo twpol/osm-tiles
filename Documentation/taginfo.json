@@ -1,5 +1,6 @@
 {
     "data_format": 1,
+    "data_url": "https://raw.githubusercontent.com/twpol/osm-tiles/master/Documentation/taginfo.json",
     "project": {
         "name": "OpenStreetMap detailed overlays",
         "description": "A tile renderer for OpenStreetMap which aims to visualise more tags than typical maps",
@@ -8,6 +9,24 @@
         "contact_email": "taginfo-osm-tiles@james-ross.co.uk"
     },
     "tags": [
+        {
+            "key": "sidewalk",
+            "value": "both",
+            "object_types": "way",
+            "description": "Displays a sidewalk on both sides of the road"
+        },
+        {
+            "key": "sidewalk",
+            "value": "left",
+            "object_types": "way",
+            "description": "Displays a sidewalk on the left side of the road"
+        },
+        {
+            "key": "sidewalk",
+            "value": "right",
+            "object_types": "way",
+            "description": "Displays a sidewalk on the right side of the road"
+        },
         {
             "key": "cycleway",
             "value": "lane",
@@ -46,7 +65,7 @@
             "key": "oneway",
             "value": "yes",
             "object_types": "way",
-            "description": "Alters the road rendering to be unidirectional"
+            "description": "Alters the road rendering to be unidirectional; default 1 or 2 lanes"
         },
         {
             "key": "parking:lane:both",
@@ -101,6 +120,17 @@
             "value": "perpendicular",
             "object_types": "way",
             "description": "Displays a perpendicular parking lane on the right side of the road"
+        },
+        {
+            "key": "layer",
+            "object_types": "way",
+            "description": "If tagged, a value other than 0 is excluded from displaying anything"
+        },
+        {
+            "key": "area",
+            "value": "yes",
+            "object_types": "area",
+            "description": "If tagged, a yes value is excluded from displaying anything"
         }
     ]
 }
