@@ -13,18 +13,21 @@
             "key": "sidewalk",
             "value": "both",
             "object_types": "way",
+            "icon_url": "https://dummyimage.com/16x16.gif/808080&text=+",
             "description": "Displays a sidewalk on both sides of the road"
         },
         {
             "key": "sidewalk",
             "value": "left",
             "object_types": "way",
+            "icon_url": "https://dummyimage.com/16x16.gif/808080&text=+",
             "description": "Displays a sidewalk on the left side of the road"
         },
         {
             "key": "sidewalk",
             "value": "right",
             "object_types": "way",
+            "icon_url": "https://dummyimage.com/16x16.gif/808080&text=+",
             "description": "Displays a sidewalk on the right side of the road"
         },
         {
