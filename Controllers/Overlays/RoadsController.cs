@@ -20,15 +20,38 @@ namespace osm_road_overlay.Controllers.Overlays
     public class RoadsController : Controller
     {
         static readonly float LaneWidthSidewalk = 2.0f;
-        static readonly float LaneWidthCar = 3.0f;
         static readonly float LaneWidthCycle = 1.0f;
+        static readonly float LaneWidthCar = 3.0f;
         static readonly Rgba32 SidewalkColor = new Rgba32(128, 128, 128);
-        // static readonly Pen<Rgba32> KerbLine = new Pen<Rgba32>(new Rgba32(64, 64, 64), 1);
+        static readonly Pen<Rgba32> KerbLine = new Pen<Rgba32>(new Rgba32(64, 64, 64), 1);
         static readonly Rgba32 RoadColor = new Rgba32(192, 192, 192);
         static readonly Pen<Rgba32> LaneLine = new Pen<Rgba32>(new Rgba32(255, 255, 255), 1, new float[] {
             10,
             5,
         });
+        static readonly HashSet<string> LaneTransitionKerb = new HashSet<string>() {
+            "Edge|Parking",
+            "Edge|Cycle",
+            "Edge|Car",
+            "Sidewalk|Parking",
+            "Sidewalk|Cycle",
+            "Sidewalk|Car",
+            "Parking|Sidewalk",
+            "Cycle|Sidewalk",
+            "Car|Sidewalk",
+            "Parking|Edge",
+            "Cycle|Edge",
+            "Car|Edge",
+        };
+        static readonly HashSet<string> LaneTransitionLine = new HashSet<string>() {
+            "Parking|Cycle",
+            "Parking|Car",
+            "Cycle|Car",
+            "Car|Car",
+            "Car|Cycle",
+            "Car|Parking",
+            "Cycle|Parking",
+        };
 
         static SizeF GetRoadOffset(float imageScale, Line line, Point point) {
             var angleDifference = Math.Abs(line.AngleRad - point.AngleRad);
@@ -126,45 +149,28 @@ namespace osm_road_overlay.Controllers.Overlays
                             var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
                             var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
 
-                            // var beforeKerb = road.Lanes.TakeWhile(lane => lane.Type == LaneType.Sidewalk).ToList();
-                            // var afterKerb = road.Lanes.Skip(beforeKerb.Count).SkipWhile(lane => lane.Type != LaneType.Sidewalk).ToList();
-
-                            var offset1 = -road.Center;
-                            Lane previousLane = null;
-                            foreach (var lane in road.Lanes)
+                            var offset = -road.Center + road.Lanes[0].Width;
+                            for (var laneIndex = 1; laneIndex < road.Lanes.Count; laneIndex++)
                             {
-                                var offset2 = offset1 + lane.Width;
-                                // if (
-                                //     (beforeKerb.Count == 0 && lane == road.Lanes.First()) ||
-                                //     (beforeKerb.Contains(previousLane) && !beforeKerb.Contains(lane)) ||
-                                //     (!afterKerb.Contains(previousLane) && afterKerb.Contains(lane))
-                                // ) {
-                                //     context.DrawLines(
-                                //         KerbLine,
-                                //         Offset(point1, offsetDir1, offset1),
-                                //         Offset(point2, offsetDir2, offset1)
-                                //     );
-                                // }
-                                // if (afterKerb.Count == 0 && lane == road.Lanes.Last()) {
-                                //     context.DrawLines(
-                                //         KerbLine,
-                                //         Offset(point1, offsetDir1, offset2),
-                                //         Offset(point2, offsetDir2, offset2)
-                                //     );
-                                // }
-                                if (
-                                    previousLane != null &&
-                                    (previousLane.Type == LaneType.Parking || previousLane.Type == LaneType.Cycle || previousLane.Type == LaneType.Car) &&
-                                    (lane.Type == LaneType.Parking || lane.Type == LaneType.Cycle || lane.Type == LaneType.Car)
-                                ) {
+                                var transition = $"{road.Lanes[laneIndex - 1].Type}|{road.Lanes[laneIndex].Type}";
+
+                                if (LaneTransitionKerb.Contains(transition)) {
                                     context.DrawLines(
-                                        LaneLine,
-                                        Offset(point1, offsetDir1, offset1),
-                                        Offset(point2, offsetDir2, offset1)
+                                        KerbLine,
+                                        Offset(point1, offsetDir1, offset),
+                                        Offset(point2, offsetDir2, offset)
                                     );
                                 }
-                                offset1 = offset2;
-                                previousLane = lane;
+
+                                if (LaneTransitionLine.Contains(transition)) {
+                                    context.DrawLines(
+                                        LaneLine,
+                                        Offset(point1, offsetDir1, offset),
+                                        Offset(point2, offsetDir2, offset)
+                                    );
+                                }
+
+                                offset += road.Lanes[laneIndex].Width;
                             }
                         });
                     }
@@ -235,6 +241,9 @@ namespace osm_road_overlay.Controllers.Overlays
             if (sidewalk == "both" || sidewalk == "right") {
                 lanes.Add(new Lane(LaneType.Sidewalk, LaneWidthSidewalk));
             }
+
+            lanes.Insert(0, new Lane(LaneType.Edge, 0));
+            lanes.Add(new Lane(LaneType.Edge, 0));
 
             return new Road(lanes, center);
         }

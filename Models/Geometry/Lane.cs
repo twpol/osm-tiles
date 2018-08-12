@@ -14,6 +14,7 @@ namespace osm_road_overlay.Models.Geometry
 
     public enum LaneType
     {
+        Edge,
         Sidewalk,
         Parking,
         Cycle,
