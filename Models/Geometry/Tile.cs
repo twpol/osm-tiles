@@ -127,7 +127,7 @@ namespace osm_road_overlay.Models.Geometry
 
             Layers = ImmutableList.ToImmutableList(overpassWays.Select(way => {
                 return way.tags.GetValueOrDefault("layer", "0");
-            }).Distinct()).Sort((a, b) => {
+            }).Distinct().Where(layer => int.TryParse(layer, out var result))).Sort((a, b) => {
                 return int.Parse(a) - int.Parse(b);
             });
 
