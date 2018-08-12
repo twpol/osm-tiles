@@ -12,128 +12,132 @@
         {
             "key": "sidewalk",
             "value": "both",
-            "object_types": "way",
+            "object_types": ["way"],
             "icon_url": "https://dummyimage.com/16x16.gif/808080&text=+",
-            "description": "Displays a sidewalk on both sides of the road"
+            "description": "Roads: Displays a sidewalk on both sides of the road"
         },
         {
             "key": "sidewalk",
             "value": "left",
-            "object_types": "way",
+            "object_types": ["way"],
             "icon_url": "https://dummyimage.com/16x16.gif/808080&text=+",
-            "description": "Displays a sidewalk on the left side of the road"
+            "description": "Roads: Displays a sidewalk on the left side of the road"
         },
         {
             "key": "sidewalk",
             "value": "right",
-            "object_types": "way",
+            "object_types": ["way"],
             "icon_url": "https://dummyimage.com/16x16.gif/808080&text=+",
-            "description": "Displays a sidewalk on the right side of the road"
+            "description": "Roads: Displays a sidewalk on the right side of the road"
         },
         {
             "key": "cycleway",
             "value": "lane",
-            "object_types": "way",
-            "description": "Displays a cycle lane on both sides of the road"
+            "object_types": ["way"],
+            "description": "Roads: Displays a cycle lane on both sides of the road"
         },
         {
             "key": "cycleway",
             "value": "opposite",
-            "object_types": "way",
-            "description": "Displays a cycle lane on the right side of the road"
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a cycle lane on the right side of the road"
         },
         {
             "key": "cycleway:left",
             "value": "lane",
-            "object_types": "way",
-            "description": "Displays a cycle lane on the left side of the road"
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a cycle lane on the left side of the road"
         },
         {
             "key": "cycleway:right",
             "value": "lane",
-            "object_types": "way",
-            "description": "Displays a cycle lane on the right side of the road"
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a cycle lane on the right side of the road"
         },
         {
             "key": "highway",
-            "object_types": "way",
-            "description": "Defines the default behaviour of the road rendering (number of lanes, etc.)"
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Defines the default behaviour of the road rendering, including whether it is shown"
         },
         {
             "key": "lanes",
-            "object_types": "way",
-            "description": "Displays this many drivable lanes on the road"
+            "object_types": ["way"],
+            "description": "Roads: Displays this many drivable lanes on the road"
         },
         {
             "key": "oneway",
             "value": "yes",
-            "object_types": "way",
-            "description": "Alters the road rendering to be unidirectional; default 1 or 2 lanes"
+            "object_types": ["way"],
+            "description": "Roads: Alters the road rendering to be unidirectional; default 1 or 2 lanes"
         },
         {
             "key": "parking:lane:both",
             "value": "parallel",
-            "object_types": "way",
-            "description": "Displays a parallel parking lane on both sides of the road"
+            "object_types": ["way"],
+            "description": "Roads: Displays a parallel parking lane on both sides of the road"
         },
         {
             "key": "parking:lane:both",
             "value": "diagonal",
-            "object_types": "way",
-            "description": "Displays a diagonal parking lane on both sides of the road"
+            "object_types": ["way"],
+            "description": "Roads: Displays a diagonal parking lane on both sides of the road"
         },
         {
             "key": "parking:lane:both",
             "value": "perpendicular",
-            "object_types": "way",
-            "description": "Displays a perpendicular parking lane on both sides of the road"
+            "object_types": ["way"],
+            "description": "Roads: Displays a perpendicular parking lane on both sides of the road"
         },
         {
             "key": "parking:lane:left",
             "value": "parallel",
-            "object_types": "way",
-            "description": "Displays a parallel parking lane on the left side of the road"
+            "object_types": ["way"],
+            "description": "Roads: Displays a parallel parking lane on the left side of the road"
         },
         {
             "key": "parking:lane:left",
             "value": "diagonal",
-            "object_types": "way",
-            "description": "Displays a diagonal parking lane on the left side of the road"
+            "object_types": ["way"],
+            "description": "Roads: Displays a diagonal parking lane on the left side of the road"
         },
         {
             "key": "parking:lane:left",
             "value": "perpendicular",
-            "object_types": "way",
-            "description": "Displays a perpendicular parking lane on the left side of the road"
+            "object_types": ["way"],
+            "description": "Roads: Displays a perpendicular parking lane on the left side of the road"
         },
         {
             "key": "parking:lane:right",
             "value": "parallel",
-            "object_types": "way",
-            "description": "Displays a parallel parking lane on the right side of the road"
+            "object_types": ["way"],
+            "description": "Roads: Displays a parallel parking lane on the right side of the road"
         },
         {
             "key": "parking:lane:right",
             "value": "diagonal",
-            "object_types": "way",
-            "description": "Displays a diagonal parking lane on the right side of the road"
+            "object_types": ["way"],
+            "description": "Roads: Displays a diagonal parking lane on the right side of the road"
         },
         {
             "key": "parking:lane:right",
             "value": "perpendicular",
-            "object_types": "way",
-            "description": "Displays a perpendicular parking lane on the right side of the road"
+            "object_types": ["way"],
+            "description": "Roads: Displays a perpendicular parking lane on the right side of the road"
         },
         {
             "key": "layer",
-            "object_types": "way",
-            "description": "If tagged, a value other than 0 is excluded from displaying anything"
+            "object_types": ["way"],
+            "description": "Roads: If tagged, a value other than 0 is excluded from displaying anything"
         },
         {
             "key": "area",
             "value": "yes",
-            "object_types": "area",
-            "description": "If tagged, a yes value is excluded from displaying anything"
+            "object_types": ["area"],
+            "description": "Roads: If tagged, a yes value is excluded from displaying anything"
         }
     ]
 }

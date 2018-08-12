@@ -12,6 +12,7 @@ A live version is running at https://osm-tiles.james-ross.co.uk/.
 
 This tile set is an overlay (meaning the tiles are transparent where there is no data) which renders roads (highways) from OpenStreetMap according to their various tags, including:
 
+- `sidewalk=both =left =right`
 - `cycleway=lane =opposite`
 - `cycleway:left=lane`
 - `cycleway:right=lane`
