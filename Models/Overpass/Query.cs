@@ -12,13 +12,8 @@ namespace osm_road_overlay.Models.Overpass
     public static class Query
     {
         const string OverpassAPIEndpoint = "http://overpass-api.de/api/interpreter";
-        const int MaximumZoomLevel = 14;
-        const int MaximumCachedGeometry = 16;
 
         static readonly HttpClient Client = new HttpClient();
-
-        static readonly Dictionary<string, Task<Way[]>> GeometryCache = new Dictionary<string, Task<Way[]>>();
-        static readonly List<string> GeometryCacheOrder = new List<string>();
 
         static async Task<Response> Get(Tile tile)
         {
@@ -48,39 +43,7 @@ namespace osm_road_overlay.Models.Overpass
             return $"{tile.SE.Lat - latExtra},{tile.NW.Lon - lonExtra},{tile.NW.Lat + latExtra},{tile.SE.Lon + lonExtra}";
         }
 
-        public static Task<Way[]> GetGeometry(Tile tile)
-        {
-            if (tile.Zoom > MaximumZoomLevel) {
-                var zoomDiff = tile.Zoom - MaximumZoomLevel;
-                tile = new Tile(MaximumZoomLevel, (int)(tile.X / Math.Pow(2, zoomDiff)), (int)(tile.Y / Math.Pow(2, zoomDiff)));
-            }
-
-            var tileKey = tile.ToString();
-            Task<Way[]> ways;
-
-            lock (GeometryCache) {
-                if (GeometryCache.TryGetValue(tileKey, out var cachedWays)) {
-                    GeometryCacheOrder.Remove(tileKey);
-                    GeometryCacheOrder.Add(tileKey);
-                    return cachedWays;
-                }
-
-                ways = GetWays(tile);
-
-                Console.WriteLine($"Caching geometry for {tileKey} ({GeometryCacheOrder.Count + 1} / {MaximumCachedGeometry})");
-                GeometryCache.Add(tileKey, ways);
-                GeometryCacheOrder.Add(tileKey);
-
-                while (GeometryCacheOrder.Count > MaximumCachedGeometry) {
-                    GeometryCache.Remove(GeometryCacheOrder[0]);
-                    GeometryCacheOrder.RemoveAt(0);
-                }
-            }
-
-            return ways;
-        }
-
-        static async Task<Way[]> GetWays(Tile tile)
+        public static async Task<Way[]> GetWays(Tile tile)
         {
             var overpass = await Get(tile);
             var overpassWays = overpass.elements.Where(element => element.type == "way").ToArray();
