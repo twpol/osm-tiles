@@ -23,7 +23,7 @@ namespace osm_road_overlay.Controllers.Overlays
         static readonly float LaneWidthCar = 3.0f;
         static readonly float LaneWidthCycle = 1.0f;
         static readonly Rgba32 SidewalkColor = new Rgba32(128, 128, 128);
-        static readonly Rgba32 KerbColor = new Rgba32(64, 64, 64);
+        // static readonly Pen<Rgba32> KerbLine = new Pen<Rgba32>(new Rgba32(64, 64, 64), 1);
         static readonly Rgba32 RoadColor = new Rgba32(192, 192, 192);
         static readonly Pen<Rgba32> LaneLine = new Pen<Rgba32>(new Rgba32(255, 255, 255), 1, new float[] {
             10,
@@ -37,20 +37,14 @@ namespace osm_road_overlay.Controllers.Overlays
             );
         }
 
-        static SizeF Vector(PointF start, PointF end) {
-            var dx = end.X - start.X;
-            var dy = end.Y - start.Y;
-            var length = Math.Sqrt(dx * dx + dy * dy);
+        static SizeF GetRoadOffset(float imageScale, Line line, Point point) {
+            var angleDifference = Math.Abs(line.AngleRad - point.AngleRad);
+            var lengthExtension = (float)Math.Cos(angleDifference);
+            var sin = (float)Math.Sin(Math.PI / 2 - point.AngleRad);
+            var cos = (float)Math.Cos(Math.PI / 2 - point.AngleRad);
             return new SizeF() {
-                Width = (float)(dx / length),
-                Height = (float)(dy / length)
-            };
-        }
-
-        static SizeF Flip(SizeF point) {
-            return new SizeF() {
-                Width = -point.Height,
-                Height = point.Width
+                Width = imageScale / lengthExtension * cos,
+                Height = imageScale / lengthExtension * sin
             };
         }
 
@@ -78,89 +72,107 @@ namespace osm_road_overlay.Controllers.Overlays
             image.Mutate(context =>
             {
                 RenderWays(tile, (way) => {
-                    var lanes = GetLanes(way);
-                    var sidewalk = way.Tags.GetValueOrDefault("sidewalk", "no");
-                    var sidewalkLeft = sidewalk == "both" || sidewalk == "left";
-                    var sidewalkRight = sidewalk == "both" || sidewalk == "right";
-                    if (lanes.Count > 0 && (sidewalkLeft || sidewalkRight)) {
+                    var road = GetRoad(way);
+                    if (road.Lanes.Count > 0) {
                         RenderWaySegments(way, (line) => {
                             var point1 = GetPointFromNode(tile, line.Start);
                             var point2 = GetPointFromNode(tile, line.End);
-                            var dir = Vector(point1, point2);
-                            var offDir = Flip(dir);
-                            var halfWidth = tile.ImageScale * lanes.Sum() / 2 + 2;
-                            var offsetLeft = halfWidth + (sidewalkLeft ? tile.ImageScale * LaneWidthSidewalk : 0);
-                            var offsetRight = halfWidth + (sidewalkRight ? tile.ImageScale * LaneWidthSidewalk : 0);
-                            context.FillPolygon(
-                                SidewalkColor,
-                                Offset(point1, offDir, -offsetLeft),
-                                Offset(point1, dir, -halfWidth),
-                                Offset(point1, offDir, offsetRight),
-                                Offset(point2, offDir, offsetRight),
-                                Offset(point2, dir, halfWidth),
-                                Offset(point2, offDir, -offsetLeft)
-                            );
+                            var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
+                            var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
+
+                            var offset1 = -road.Center;
+                            foreach (var lane in road.Lanes)
+                            {
+                                var offset2 = offset1 + lane.Width;
+                                if (lane.Type == LaneType.Sidewalk) {
+                                    context.FillPolygon(
+                                        SidewalkColor,
+                                        Offset(point1, offsetDir1, offset1),
+                                        Offset(point1, offsetDir1, offset2),
+                                        Offset(point2, offsetDir2, offset2),
+                                        Offset(point2, offsetDir2, offset1)
+                                    );
+                                }
+                                offset1 = offset2;
+                            }
                         });
                     }
                 });
                 RenderWays(tile, (way) => {
-                    var lanes = GetLanes(way);
-                    if (lanes.Count > 0) {
+                    var road = GetRoad(way);
+                    if (road.Lanes.Count > 0) {
                         RenderWaySegments(way, (line) => {
                             var point1 = GetPointFromNode(tile, line.Start);
                             var point2 = GetPointFromNode(tile, line.End);
-                            var dir = Vector(point1, point2);
-                            var offDir = Flip(dir);
-                            var halfWidth = tile.ImageScale * lanes.Sum() / 2 + 2;
-                            context.FillPolygon(
-                                KerbColor,
-                                Offset(point1, offDir, halfWidth),
-                                Offset(point1, dir, -halfWidth),
-                                Offset(point1, offDir, -halfWidth),
-                                Offset(point2, offDir, -halfWidth),
-                                Offset(point2, dir, halfWidth),
-                                Offset(point2, offDir, halfWidth)
-                            );
+                            var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
+                            var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
+
+                            var offset1 = -road.Center;
+                            foreach (var lane in road.Lanes)
+                            {
+                                var offset2 = offset1 + lane.Width;
+                                if (lane.Type == LaneType.Parking || lane.Type == LaneType.Cycle || lane.Type == LaneType.Car) {
+                                    context.FillPolygon(
+                                        RoadColor,
+                                        Offset(point1, offsetDir1, offset1),
+                                        Offset(point1, offsetDir1, offset2),
+                                        Offset(point2, offsetDir2, offset2),
+                                        Offset(point2, offsetDir2, offset1)
+                                    );
+                                }
+                                offset1 = offset2;
+                            }
                         });
                     }
                 });
                 RenderWays(tile, (way) => {
-                    var lanes = GetLanes(way);
-                    if (lanes.Count > 0) {
+                    var road = GetRoad(way);
+                    if (road.Lanes.Count > 0) {
                         RenderWaySegments(way, (line) => {
                             var point1 = GetPointFromNode(tile, line.Start);
                             var point2 = GetPointFromNode(tile, line.End);
-                            var dir = Vector(point1, point2);
-                            var offDir = Flip(dir);
-                            var halfWidth = tile.ImageScale * lanes.Sum() / 2 + 1;
-                            context.FillPolygon(
-                                RoadColor,
-                                Offset(point1, offDir, halfWidth),
-                                Offset(point1, dir, -halfWidth),
-                                Offset(point1, offDir, -halfWidth),
-                                Offset(point2, offDir, -halfWidth),
-                                Offset(point2, dir, halfWidth),
-                                Offset(point2, offDir, halfWidth)
-                            );
-                        });
-                    }
-                });
-                RenderWays(tile, (way) => {
-                    var lanes = GetLanes(way);
-                    if (lanes.Count > 1) {
-                        RenderWaySegments(way, (line) => {
-                            var point1 = GetPointFromNode(tile, line.Start);
-                            var point2 = GetPointFromNode(tile, line.End);
-                            var dir = Vector(point1, point2);
-                            var offDir = Flip(dir);
-                            var laneOffset = -lanes.Sum() / 2;
-                            for (var laneIndex = 0; laneIndex < lanes.Count - 1; laneIndex++) {
-                                laneOffset += lanes[laneIndex];
-                                context.DrawLines(
-                                    LaneLine,
-                                    Offset(point1, offDir, tile.ImageScale * laneOffset),
-                                    Offset(point2, offDir, tile.ImageScale * laneOffset)
-                                );
+                            var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
+                            var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
+
+                            // var beforeKerb = road.Lanes.TakeWhile(lane => lane.Type == LaneType.Sidewalk).ToList();
+                            // var afterKerb = road.Lanes.Skip(beforeKerb.Count).SkipWhile(lane => lane.Type != LaneType.Sidewalk).ToList();
+
+                            var offset1 = -road.Center;
+                            Lane previousLane = null;
+                            foreach (var lane in road.Lanes)
+                            {
+                                var offset2 = offset1 + lane.Width;
+                                // if (
+                                //     (beforeKerb.Count == 0 && lane == road.Lanes.First()) ||
+                                //     (beforeKerb.Contains(previousLane) && !beforeKerb.Contains(lane)) ||
+                                //     (!afterKerb.Contains(previousLane) && afterKerb.Contains(lane))
+                                // ) {
+                                //     context.DrawLines(
+                                //         KerbLine,
+                                //         Offset(point1, offsetDir1, offset1),
+                                //         Offset(point2, offsetDir2, offset1)
+                                //     );
+                                // }
+                                // if (afterKerb.Count == 0 && lane == road.Lanes.Last()) {
+                                //     context.DrawLines(
+                                //         KerbLine,
+                                //         Offset(point1, offsetDir1, offset2),
+                                //         Offset(point2, offsetDir2, offset2)
+                                //     );
+                                // }
+                                if (
+                                    previousLane != null &&
+                                    (previousLane.Type == LaneType.Parking || previousLane.Type == LaneType.Cycle || previousLane.Type == LaneType.Car) &&
+                                    (lane.Type == LaneType.Parking || lane.Type == LaneType.Cycle || lane.Type == LaneType.Car)
+                                ) {
+                                    context.DrawLines(
+                                        LaneLine,
+                                        Offset(point1, offsetDir1, offset1),
+                                        Offset(point2, offsetDir2, offset1)
+                                    );
+                                }
+                                offset1 = offset2;
+                                previousLane = lane;
                             }
                         });
                     }
@@ -177,42 +189,62 @@ namespace osm_road_overlay.Controllers.Overlays
             return File(stream, "image/png");
         }
 
-        static List<float> GetLanes(Way way) {
-            var lanes = new List<float>();
+        static Road GetRoad(Way way) {
+            var lanes = new List<Lane>();
+            var center = 0f;
+
             var drivingLanes = GetNumberOfDrivingLanes(way);
             if (drivingLanes == 0) {
-                return lanes;
+                return new Road(lanes, center);
             }
+
             for (var i = 0; i < drivingLanes; i++) {
-                lanes.Add(LaneWidthCar);
+                lanes.Add(new Lane(LaneType.Car, LaneWidthCar));
             }
+            center += LaneWidthCar * drivingLanes / 2;
+
+            if (way.Tags.GetValueOrDefault("cycleway", "no") == "lane") {
+                lanes.Insert(0, new Lane(LaneType.Cycle, LaneWidthCycle));
+                lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
+                center += LaneWidthCycle;
+            } else if (way.Tags.GetValueOrDefault("cycleway", "no") == "opposite") {
+                lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
+            } else {
+                if (way.Tags.GetValueOrDefault("cycleway:left", "no") == "lane") {
+                    lanes.Insert(0, new Lane(LaneType.Cycle, LaneWidthCycle));
+                    center += LaneWidthCycle;
+                }
+                if (way.Tags.GetValueOrDefault("cycleway:right", "no") == "lane") {
+                    lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
+                }
+            }
+
             var parkingLeftLanes = GetWidthOfParkingLanes(way, ":left");
             if (parkingLeftLanes > 0) {
-                lanes.Insert(0, parkingLeftLanes);
+                lanes.Insert(0, new Lane(LaneType.Parking, parkingLeftLanes));
+                center += parkingLeftLanes;
             }
             var parkingRightLanes = GetWidthOfParkingLanes(way, ":right");
             if (parkingRightLanes > 0) {
-                lanes.Add(parkingRightLanes);
+                lanes.Add(new Lane(LaneType.Parking, parkingRightLanes));
             }
             var parkingBothLanes = GetWidthOfParkingLanes(way, ":both");
             if (parkingBothLanes > 0) {
-                lanes.Insert(0, parkingBothLanes);
-                lanes.Add(parkingBothLanes);
+                lanes.Insert(0, new Lane(LaneType.Parking, parkingBothLanes));
+                lanes.Add(new Lane(LaneType.Parking, parkingBothLanes));
+                center += parkingLeftLanes;
             }
-            if (way.Tags.GetValueOrDefault("cycleway", "no") == "lane") {
-                lanes.Insert(0, LaneWidthCycle);
-                lanes.Add(LaneWidthCycle);
-            } else if (way.Tags.GetValueOrDefault("cycleway", "no") == "opposite") {
-                lanes.Add(LaneWidthCycle);
-            } else {
-                if (way.Tags.GetValueOrDefault("cycleway:left", "no") == "lane") {
-                    lanes.Insert(0, LaneWidthCycle);
-                }
-                if (way.Tags.GetValueOrDefault("cycleway:right", "no") == "lane") {
-                    lanes.Add(LaneWidthCycle);
-                }
+
+            var sidewalk = way.Tags.GetValueOrDefault("sidewalk", "no");
+            if (sidewalk == "both" || sidewalk == "left") {
+                lanes.Insert(0, new Lane(LaneType.Sidewalk, LaneWidthSidewalk));
+                center += LaneWidthSidewalk;
             }
-            return lanes;
+            if (sidewalk == "both" || sidewalk == "right") {
+                lanes.Add(new Lane(LaneType.Sidewalk, LaneWidthSidewalk));
+            }
+
+            return new Road(lanes, center);
         }
 
         static int GetNumberOfDrivingLanes(Way way) {

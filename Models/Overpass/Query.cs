@@ -95,14 +95,11 @@ namespace osm_road_overlay.Models.Overpass
             );
 
             var ways = overpassWays.Select(way => {
-                var geoPoints = way.nodes.Select(nodeId => {
-                    var node = overpassNodesById[nodeId];
-                    return new Point(node.lat, node.lon);
-                }).ToArray();
                 return new Way(
                     way.tags,
-                    Enumerable.Range(0, geoPoints.Length - 1).Select(index => {
-                        return new Line(geoPoints[index], geoPoints[index + 1]);
+                    way.nodes.Select(nodeId => {
+                        var node = overpassNodesById[nodeId];
+                        return new Point(node.lat, node.lon);
                     })
                 );
             }).ToArray();
