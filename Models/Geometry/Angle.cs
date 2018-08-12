@@ -18,6 +18,11 @@ namespace osm_road_overlay.Models.Geometry
             while (Radians > Math.PI) Radians -= 2 * Math.PI;
         }
 
+        public override string ToString()
+        {
+            return $"{Radians * 180 / Math.PI:F3}°";
+        }
+
         public static Angle Add(Angle angle1, Angle angle2)
         {
             return new Angle(angle1.Radians + angle2.Radians);

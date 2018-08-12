@@ -56,7 +56,7 @@ namespace osm_road_overlay.Controllers.Overlays
         static SizeF GetRoadOffset(Tile tile, Line line, Point point) {
             var lengthExtension = (float)Math.Cos(Angle.Difference(line.Angle, point.Angle).Radians);
             if (lengthExtension < 0.5) {
-                Console.WriteLine($"Warning: Unusual length extension for road offset (time={tile}, line={line.Angle}, point={point.Angle}, extension={lengthExtension})");
+                Console.WriteLine($"Warning: Unusual length extension for road offset (tile={tile}, line={line.Angle}, point={point.Angle}, extension={lengthExtension})");
                 lengthExtension = 0.5f;
             }
             var sin = (float)Math.Sin(Angle.Subtract(Angle.QuarterTurn, point.Angle).Radians);
