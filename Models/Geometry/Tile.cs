@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using SixLabors.Primitives;
 
@@ -82,7 +83,28 @@ namespace osm_road_overlay.Models.Geometry
             Debug.Assert(Zoom == MaximumCachedZoomLevel, $"Trying to load geometry for incorrect zoom level {Zoom}");
             Debug.Assert(Ways == null, "Cannot load data for Tile more than once");
 
-            Ways = ImmutableList.ToImmutableList(await Models.Overpass.Query.GetWays(this));
+            var overpass = await Overpass.Query.Get(this);
+            var overpassWays = overpass.elements.Where(element => element.type == "way").ToArray();
+            var overpassNodes = overpass.elements.Where(element => element.type == "node").ToArray();
+            var overpassNodesById = new Dictionary<long, Overpass.Element>(
+                overpassNodes.Select(node => {
+                    return new KeyValuePair<long, Overpass.Element>(
+                        node.id,
+                        node
+                    );
+                })
+            );
+
+            Ways = ImmutableList.ToImmutableList(overpassWays.Select(way => {
+                return new Way(
+                    this,
+                    way.tags,
+                    way.nodes.Select(nodeId => {
+                        var node = overpassNodesById[nodeId];
+                        return new Point(node.lat, node.lon);
+                    })
+                );
+            }));
 
             return this;
         }
