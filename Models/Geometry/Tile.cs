@@ -59,6 +59,7 @@ namespace osm_road_overlay.Models.Geometry
         public Point SE { get; }
         public float ImageScale { get; }
         public ImmutableList<Way> Roads { get; private set; }
+        public ImmutableList<Junction> RoadJunctions { get; private set; }
 
         Tile(int zoom, int x, int y)
         {
@@ -76,6 +77,7 @@ namespace osm_road_overlay.Models.Geometry
             Debug.Assert(copy.Roads != null, "Cannot copy data from Tile without any data");
 
             Roads = copy.Roads;
+            RoadJunctions = copy.RoadJunctions;
         }
 
         async Task<Tile> LoadGeometry()
@@ -113,6 +115,9 @@ namespace osm_road_overlay.Models.Geometry
                         return true;
                 }
                 return false;
+            }).ToList();
+            var overpassRoadJunctions = overpassNodes.Where(node => {
+                return 1 < overpassRoads.Where(road => road.nodes.Contains(node.id)).Count();
             });
 
             Roads = ImmutableList.ToImmutableList(overpassRoads.Select(way => {
@@ -122,6 +127,15 @@ namespace osm_road_overlay.Models.Geometry
                     way.nodes.Select(nodeId => {
                         var node = overpassNodesById[nodeId];
                         return new Point(node.lat, node.lon);
+                    })
+                );
+            }));
+            RoadJunctions = ImmutableList.ToImmutableList(overpassRoadJunctions.Select(node => {
+                return new Junction(
+                    overpassRoads.Where(road => road.nodes.Contains(node.id)).Select(road => {
+                        var way = Roads[overpassRoads.IndexOf(road)];
+                        var point = way.Points[Array.IndexOf(road.nodes, node.id)];
+                        return new WayPoint(way, point);
                     })
                 );
             }));
