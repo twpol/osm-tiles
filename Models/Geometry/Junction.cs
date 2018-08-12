@@ -19,9 +19,14 @@ namespace osm_road_overlay.Models.Geometry
             TerminatedWayPoints = ImmutableList.ToImmutableList(wayPoints.Where(wayPoint => !wayPoint.IsMiddle));
 
             if (ThroughWayPoints.Count == 0 && TerminatedWayPoints.Count == 2) {
-                var angleRad = (TerminatedWayPoints[0].Point.AngleRad + TerminatedWayPoints[1].Point.AngleRad) / 2;
-                TerminatedWayPoints[0].Point.AngleRad = angleRad;
-                TerminatedWayPoints[1].Point.AngleRad = angleRad;
+                var extraAngle1 = TerminatedWayPoints[0].IsFirst ? Angle.HalfTurn : Angle.Zero;
+                var extraAngle2 = TerminatedWayPoints[1].IsLast ? Angle.HalfTurn : Angle.Zero;
+                var angleRad = Angle.Average(
+                    Angle.Add(TerminatedWayPoints[0].Point.Angle, extraAngle1),
+                    Angle.Add(TerminatedWayPoints[1].Point.Angle, extraAngle2)
+                );
+                TerminatedWayPoints[0].Point.Angle = Angle.Add(angleRad, extraAngle1);
+                TerminatedWayPoints[1].Point.Angle = Angle.Add(angleRad, extraAngle2);
             }
         }
     }

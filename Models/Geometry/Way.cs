@@ -20,12 +20,12 @@ namespace osm_road_overlay.Models.Geometry
                     return new Line(tile, Points[index], Points[index + 1]);
                 })
             );
-            Points[0].AngleRad = Segments[0].AngleRad;
+            Points[0].Angle = Segments[0].Angle;
             for (var index = 1; index < Points.Count - 1; index++)
             {
-                Points[index].AngleRad = (Segments[index - 1].AngleRad + Segments[index].AngleRad) / 2;
+                Points[index].Angle = Angle.Average(Segments[index - 1].Angle, Segments[index].Angle);
             }
-            Points[Points.Count - 1].AngleRad = Segments[Segments.Count - 1].AngleRad;
+            Points[Points.Count - 1].Angle = Segments[Segments.Count - 1].Angle;
         }
     }
 }

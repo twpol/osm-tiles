@@ -53,14 +53,17 @@ namespace osm_road_overlay.Controllers.Overlays
             "Cycle|Parking",
         };
 
-        static SizeF GetRoadOffset(float imageScale, Line line, Point point) {
-            var angleDifference = Math.Abs(line.AngleRad - point.AngleRad);
-            var lengthExtension = (float)Math.Cos(angleDifference);
-            var sin = (float)Math.Sin(Math.PI / 2 - point.AngleRad);
-            var cos = (float)Math.Cos(Math.PI / 2 - point.AngleRad);
+        static SizeF GetRoadOffset(Tile tile, Line line, Point point) {
+            var lengthExtension = (float)Math.Cos(Angle.Difference(line.Angle, point.Angle).Radians);
+            if (lengthExtension < 0.5) {
+                Console.WriteLine($"Warning: Unusual length extension for road offset (time={tile}, line={line.Angle}, point={point.Angle}, extension={lengthExtension})");
+                lengthExtension = 0.5f;
+            }
+            var sin = (float)Math.Sin(Angle.Subtract(Angle.QuarterTurn, point.Angle).Radians);
+            var cos = (float)Math.Cos(Angle.Subtract(Angle.QuarterTurn, point.Angle).Radians);
             return new SizeF() {
-                Width = -imageScale / lengthExtension * cos,
-                Height = imageScale / lengthExtension * sin
+                Width = -tile.ImageScale / lengthExtension * cos,
+                Height = tile.ImageScale / lengthExtension * sin
             };
         }
 
@@ -93,8 +96,8 @@ namespace osm_road_overlay.Controllers.Overlays
                             RenderRoadSegments(way, (line) => {
                                 var point1 = tile.GetPointFromPoint(line.Start);
                                 var point2 = tile.GetPointFromPoint(line.End);
-                                var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
-                                var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
+                                var offsetDir1 = GetRoadOffset(tile, line, line.Start);
+                                var offsetDir2 = GetRoadOffset(tile, line, line.End);
 
                                 var offset1 = -road.Center;
                                 foreach (var lane in road.Lanes)
@@ -120,8 +123,8 @@ namespace osm_road_overlay.Controllers.Overlays
                             RenderRoadSegments(way, (line) => {
                                 var point1 = tile.GetPointFromPoint(line.Start);
                                 var point2 = tile.GetPointFromPoint(line.End);
-                                var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
-                                var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
+                                var offsetDir1 = GetRoadOffset(tile, line, line.Start);
+                                var offsetDir2 = GetRoadOffset(tile, line, line.End);
 
                                 var offset1 = -road.Center;
                                 foreach (var lane in road.Lanes)
@@ -147,8 +150,8 @@ namespace osm_road_overlay.Controllers.Overlays
                             RenderRoadSegments(way, (line) => {
                                 var point1 = tile.GetPointFromPoint(line.Start);
                                 var point2 = tile.GetPointFromPoint(line.End);
-                                var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
-                                var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
+                                var offsetDir1 = GetRoadOffset(tile, line, line.Start);
+                                var offsetDir2 = GetRoadOffset(tile, line, line.End);
 
                                 var offset = -road.Center + road.Lanes[0].Width;
                                 for (var laneIndex = 1; laneIndex < road.Lanes.Count; laneIndex++)

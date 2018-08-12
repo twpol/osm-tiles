@@ -4,7 +4,7 @@ namespace osm_road_overlay.Models.Geometry
     {
         public double Lat { get; }
         public double Lon { get; }
-        public double AngleRad { get; internal set; }
+        public Angle Angle { get; internal set; }
 
         public Point(double lat, double lon)
         {
