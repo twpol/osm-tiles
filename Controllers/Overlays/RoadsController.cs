@@ -86,95 +86,97 @@ namespace osm_road_overlay.Controllers.Overlays
             var image = new Image<Rgba32>(256, 256);
             image.Mutate(context =>
             {
-                RenderRoads(tile, (way) => {
-                    var road = GetRoad(way);
-                    if (road.Lanes.Count > 0) {
-                        RenderRoadSegments(way, (line) => {
-                            var point1 = tile.GetPointFromPoint(line.Start);
-                            var point2 = tile.GetPointFromPoint(line.End);
-                            var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
-                            var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
+                foreach (var layer in tile.Layers) {
+                    RenderRoads(tile, layer, (way) => {
+                        var road = GetRoad(way);
+                        if (road.Lanes.Count > 0) {
+                            RenderRoadSegments(way, (line) => {
+                                var point1 = tile.GetPointFromPoint(line.Start);
+                                var point2 = tile.GetPointFromPoint(line.End);
+                                var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
+                                var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
 
-                            var offset1 = -road.Center;
-                            foreach (var lane in road.Lanes)
-                            {
-                                var offset2 = offset1 + lane.Width;
-                                if (lane.Type == LaneType.Sidewalk) {
-                                    context.FillPolygon(
-                                        SidewalkColor,
-                                        Offset(point1, offsetDir1, offset1),
-                                        Offset(point1, offsetDir1, offset2),
-                                        Offset(point2, offsetDir2, offset2),
-                                        Offset(point2, offsetDir2, offset1)
-                                    );
+                                var offset1 = -road.Center;
+                                foreach (var lane in road.Lanes)
+                                {
+                                    var offset2 = offset1 + lane.Width;
+                                    if (lane.Type == LaneType.Sidewalk) {
+                                        context.FillPolygon(
+                                            SidewalkColor,
+                                            Offset(point1, offsetDir1, offset1),
+                                            Offset(point1, offsetDir1, offset2),
+                                            Offset(point2, offsetDir2, offset2),
+                                            Offset(point2, offsetDir2, offset1)
+                                        );
+                                    }
+                                    offset1 = offset2;
                                 }
-                                offset1 = offset2;
-                            }
-                        });
-                    }
-                });
-                RenderRoads(tile, (way) => {
-                    var road = GetRoad(way);
-                    if (road.Lanes.Count > 0) {
-                        RenderRoadSegments(way, (line) => {
-                            var point1 = tile.GetPointFromPoint(line.Start);
-                            var point2 = tile.GetPointFromPoint(line.End);
-                            var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
-                            var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
+                            });
+                        }
+                    });
+                    RenderRoads(tile, layer, (way) => {
+                        var road = GetRoad(way);
+                        if (road.Lanes.Count > 0) {
+                            RenderRoadSegments(way, (line) => {
+                                var point1 = tile.GetPointFromPoint(line.Start);
+                                var point2 = tile.GetPointFromPoint(line.End);
+                                var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
+                                var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
 
-                            var offset1 = -road.Center;
-                            foreach (var lane in road.Lanes)
-                            {
-                                var offset2 = offset1 + lane.Width;
-                                if (lane.Type == LaneType.Parking || lane.Type == LaneType.Cycle || lane.Type == LaneType.Car) {
-                                    context.FillPolygon(
-                                        RoadColor,
-                                        Offset(point1, offsetDir1, offset1),
-                                        Offset(point1, offsetDir1, offset2),
-                                        Offset(point2, offsetDir2, offset2),
-                                        Offset(point2, offsetDir2, offset1)
-                                    );
+                                var offset1 = -road.Center;
+                                foreach (var lane in road.Lanes)
+                                {
+                                    var offset2 = offset1 + lane.Width;
+                                    if (lane.Type == LaneType.Parking || lane.Type == LaneType.Cycle || lane.Type == LaneType.Car) {
+                                        context.FillPolygon(
+                                            RoadColor,
+                                            Offset(point1, offsetDir1, offset1),
+                                            Offset(point1, offsetDir1, offset2),
+                                            Offset(point2, offsetDir2, offset2),
+                                            Offset(point2, offsetDir2, offset1)
+                                        );
+                                    }
+                                    offset1 = offset2;
                                 }
-                                offset1 = offset2;
-                            }
-                        });
-                    }
-                });
-                RenderRoads(tile, (way) => {
-                    var road = GetRoad(way);
-                    if (road.Lanes.Count > 0) {
-                        RenderRoadSegments(way, (line) => {
-                            var point1 = tile.GetPointFromPoint(line.Start);
-                            var point2 = tile.GetPointFromPoint(line.End);
-                            var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
-                            var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
+                            });
+                        }
+                    });
+                    RenderRoads(tile, layer, (way) => {
+                        var road = GetRoad(way);
+                        if (road.Lanes.Count > 0) {
+                            RenderRoadSegments(way, (line) => {
+                                var point1 = tile.GetPointFromPoint(line.Start);
+                                var point2 = tile.GetPointFromPoint(line.End);
+                                var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
+                                var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
 
-                            var offset = -road.Center + road.Lanes[0].Width;
-                            for (var laneIndex = 1; laneIndex < road.Lanes.Count; laneIndex++)
-                            {
-                                var transition = $"{road.Lanes[laneIndex - 1].Type}|{road.Lanes[laneIndex].Type}";
+                                var offset = -road.Center + road.Lanes[0].Width;
+                                for (var laneIndex = 1; laneIndex < road.Lanes.Count; laneIndex++)
+                                {
+                                    var transition = $"{road.Lanes[laneIndex - 1].Type}|{road.Lanes[laneIndex].Type}";
 
-                                if (LaneTransitionKerb.Contains(transition)) {
-                                    context.DrawLines(
-                                        KerbLine,
-                                        Offset(point1, offsetDir1, offset),
-                                        Offset(point2, offsetDir2, offset)
-                                    );
+                                    if (LaneTransitionKerb.Contains(transition)) {
+                                        context.DrawLines(
+                                            KerbLine,
+                                            Offset(point1, offsetDir1, offset),
+                                            Offset(point2, offsetDir2, offset)
+                                        );
+                                    }
+
+                                    if (LaneTransitionLine.Contains(transition)) {
+                                        context.DrawLines(
+                                            LaneLine,
+                                            Offset(point1, offsetDir1, offset),
+                                            Offset(point2, offsetDir2, offset)
+                                        );
+                                    }
+
+                                    offset += road.Lanes[laneIndex].Width;
                                 }
-
-                                if (LaneTransitionLine.Contains(transition)) {
-                                    context.DrawLines(
-                                        LaneLine,
-                                        Offset(point1, offsetDir1, offset),
-                                        Offset(point2, offsetDir2, offset)
-                                    );
-                                }
-
-                                offset += road.Lanes[laneIndex].Width;
-                            }
-                        });
-                    }
-                });
+                            });
+                        }
+                    });
+                }
             });
 
             var end = DateTimeOffset.UtcNow;
@@ -266,17 +268,12 @@ namespace osm_road_overlay.Controllers.Overlays
             }
         }
 
-        static void RenderRoads(Tile tile, Action<Way> render)
+        static void RenderRoads(Tile tile, string layer, Action<Way> render)
         {
-            foreach (var way in tile.Roads)
-            {
-                if (way.Tags.GetValueOrDefault("layer", "0") != "0") {
-                    continue;
+            foreach (var way in tile.Roads) {
+                if (way.Tags.GetValueOrDefault("layer", "0") == layer) {
+                    render(way);
                 }
-                if (way.Tags.GetValueOrDefault("area", "no") == "yes") {
-                    continue;
-                }
-                render(way);
             }
         }
 

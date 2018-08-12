@@ -131,7 +131,7 @@
         {
             "key": "layer",
             "object_types": ["way"],
-            "description": "Roads: If tagged, a value other than 0 is excluded from displaying anything"
+            "description": "Roads: Alters the rendering to separate multiple layers of roads"
         },
         {
             "key": "area",

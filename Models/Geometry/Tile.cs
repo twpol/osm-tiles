@@ -58,6 +58,7 @@ namespace osm_road_overlay.Models.Geometry
         public Point NW { get; }
         public Point SE { get; }
         public float ImageScale { get; }
+        public ImmutableList<string> Layers { get; private set; }
         public ImmutableList<Way> Roads { get; private set; }
         public ImmutableList<Junction> RoadJunctions { get; private set; }
 
@@ -74,8 +75,9 @@ namespace osm_road_overlay.Models.Geometry
         Tile(int zoom, int x, int y, Tile copy)
             : this(zoom, x, y)
         {
-            Debug.Assert(copy.Roads != null, "Cannot copy data from Tile without any data");
+            Debug.Assert(copy.Layers != null, "Cannot copy data from Tile without any data");
 
+            Layers = copy.Layers;
             Roads = copy.Roads;
             RoadJunctions = copy.RoadJunctions;
         }
@@ -98,6 +100,9 @@ namespace osm_road_overlay.Models.Geometry
             );
 
             var overpassRoads = overpassWays.Where(way => {
+                if (way.tags.GetValueOrDefault("area", "no") == "yes") {
+                    return false;
+                }
                 switch (way.tags.GetValueOrDefault("highway", "no")) {
                     case "motorway":
                     case "trunk":
@@ -118,6 +123,12 @@ namespace osm_road_overlay.Models.Geometry
             }).ToList();
             var overpassRoadJunctions = overpassNodes.Where(node => {
                 return 1 < overpassRoads.Where(road => road.nodes.Contains(node.id)).Count();
+            });
+
+            Layers = ImmutableList.ToImmutableList(overpassWays.Select(way => {
+                return way.tags.GetValueOrDefault("layer", "0");
+            }).Distinct()).Sort((a, b) => {
+                return int.Parse(a) - int.Parse(b);
             });
 
             Roads = ImmutableList.ToImmutableList(overpassRoads.Select(way => {

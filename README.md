@@ -22,10 +22,10 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 - `parking:lanes:both=parallel =diagonal =perpendicular`
 - `parking:lanes:left=parallel =diagonal =perpendicular`
 - `parking:lanes:right=parallel =diagonal =perpendicular`
+- `layer=*`
 
 ### Limitations
 
-- Only `layer=0` or `!layer` ways are rendered for now.
 - Only zoom levels 16 through 22 are supported.
 
 ### Current rendering
@@ -39,7 +39,6 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 ## To do
 
 - Separation and correction of way end nodes at junctions (to align lanes)
-- Calculations for `layer!=0`, bridges, tunnels
 - Calculations for bus, PSV (public service vehicle), other specialised lanes
 - Calculations for `placement=*`
 - Calculations using turn lane markings
