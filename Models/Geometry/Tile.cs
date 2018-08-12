@@ -58,7 +58,7 @@ namespace osm_road_overlay.Models.Geometry
         public Point NW { get; }
         public Point SE { get; }
         public float ImageScale { get; }
-        public ImmutableList<Way> Ways { get; private set; }
+        public ImmutableList<Way> Roads { get; private set; }
 
         Tile(int zoom, int x, int y)
         {
@@ -73,15 +73,15 @@ namespace osm_road_overlay.Models.Geometry
         Tile(int zoom, int x, int y, Tile copy)
             : this(zoom, x, y)
         {
-            Debug.Assert(copy.Ways != null, "Cannot copy data from Tile without any data");
+            Debug.Assert(copy.Roads != null, "Cannot copy data from Tile without any data");
 
-            Ways = copy.Ways;
+            Roads = copy.Roads;
         }
 
         async Task<Tile> LoadGeometry()
         {
             Debug.Assert(Zoom == MaximumCachedZoomLevel, $"Trying to load geometry for incorrect zoom level {Zoom}");
-            Debug.Assert(Ways == null, "Cannot load data for Tile more than once");
+            Debug.Assert(Roads == null, "Cannot load data for Tile more than once");
 
             var overpass = await Overpass.Query.Get(this);
             var overpassWays = overpass.elements.Where(element => element.type == "way").ToArray();
@@ -95,7 +95,27 @@ namespace osm_road_overlay.Models.Geometry
                 })
             );
 
-            Ways = ImmutableList.ToImmutableList(overpassWays.Select(way => {
+            var overpassRoads = overpassWays.Where(way => {
+                switch (way.tags.GetValueOrDefault("highway", "no")) {
+                    case "motorway":
+                    case "trunk":
+                    case "primary":
+                    case "secondary":
+                    case "tertiary":
+                    case "unclassified":
+                    case "residential":
+                    case "service":
+                    case "motorway_link":
+                    case "trunk_link":
+                    case "primary_link":
+                    case "secondary_link":
+                    case "tertiary_link":
+                        return true;
+                }
+                return false;
+            });
+
+            Roads = ImmutableList.ToImmutableList(overpassRoads.Select(way => {
                 return new Way(
                     this,
                     way.tags,

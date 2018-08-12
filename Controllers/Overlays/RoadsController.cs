@@ -86,10 +86,10 @@ namespace osm_road_overlay.Controllers.Overlays
             var image = new Image<Rgba32>(256, 256);
             image.Mutate(context =>
             {
-                RenderWays(tile, (way) => {
+                RenderRoads(tile, (way) => {
                     var road = GetRoad(way);
                     if (road.Lanes.Count > 0) {
-                        RenderWaySegments(way, (line) => {
+                        RenderRoadSegments(way, (line) => {
                             var point1 = tile.GetPointFromPoint(line.Start);
                             var point2 = tile.GetPointFromPoint(line.End);
                             var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
@@ -113,10 +113,10 @@ namespace osm_road_overlay.Controllers.Overlays
                         });
                     }
                 });
-                RenderWays(tile, (way) => {
+                RenderRoads(tile, (way) => {
                     var road = GetRoad(way);
                     if (road.Lanes.Count > 0) {
-                        RenderWaySegments(way, (line) => {
+                        RenderRoadSegments(way, (line) => {
                             var point1 = tile.GetPointFromPoint(line.Start);
                             var point2 = tile.GetPointFromPoint(line.End);
                             var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
@@ -140,10 +140,10 @@ namespace osm_road_overlay.Controllers.Overlays
                         });
                     }
                 });
-                RenderWays(tile, (way) => {
+                RenderRoads(tile, (way) => {
                     var road = GetRoad(way);
                     if (road.Lanes.Count > 0) {
-                        RenderWaySegments(way, (line) => {
+                        RenderRoadSegments(way, (line) => {
                             var point1 = tile.GetPointFromPoint(line.Start);
                             var point2 = tile.GetPointFromPoint(line.End);
                             var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
@@ -249,25 +249,8 @@ namespace osm_road_overlay.Controllers.Overlays
         }
 
         static int GetNumberOfDrivingLanes(Way way) {
-            switch (way.Tags.GetValueOrDefault("highway", "no")) {
-                case "motorway":
-                case "trunk":
-                case "primary":
-                case "secondary":
-                case "tertiary":
-                case "unclassified":
-                case "residential":
-                case "service":
-                case "motorway_link":
-                case "trunk_link":
-                case "primary_link":
-                case "secondary_link":
-                case "tertiary_link":
-                    var defaultLanes = way.Tags.GetValueOrDefault("oneway", "no") == "yes" ? "1" : "2";
-                    return int.Parse(way.Tags.GetValueOrDefault("lanes", defaultLanes));
-                default:
-                    return 0;
-            }
+            var defaultLanes = way.Tags.GetValueOrDefault("oneway", "no") == "yes" ? "1" : "2";
+            return int.Parse(way.Tags.GetValueOrDefault("lanes", defaultLanes));
         }
 
         static float GetWidthOfParkingLanes(Way way, string side) {
@@ -283,9 +266,9 @@ namespace osm_road_overlay.Controllers.Overlays
             }
         }
 
-        static void RenderWays(Tile tile, Action<Way> render)
+        static void RenderRoads(Tile tile, Action<Way> render)
         {
-            foreach (var way in tile.Ways)
+            foreach (var way in tile.Roads)
             {
                 if (way.Tags.GetValueOrDefault("layer", "0") != "0") {
                     continue;
@@ -297,7 +280,7 @@ namespace osm_road_overlay.Controllers.Overlays
             }
         }
 
-        static void RenderWaySegments(Way way, Action<Line> render)
+        static void RenderRoadSegments(Way way, Action<Line> render)
         {
             foreach (var segment in way.Segments)
             {
