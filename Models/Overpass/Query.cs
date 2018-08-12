@@ -96,6 +96,7 @@ namespace osm_road_overlay.Models.Overpass
 
             var ways = overpassWays.Select(way => {
                 return new Way(
+                    tile,
                     way.tags,
                     way.nodes.Select(nodeId => {
                         var node = overpassNodesById[nodeId];

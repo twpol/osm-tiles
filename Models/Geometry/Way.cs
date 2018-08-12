@@ -11,13 +11,13 @@ namespace osm_road_overlay.Models.Geometry
         public ImmutableList<Point> Points { get; }
         public ImmutableList<Line> Segments { get; }
 
-        public Way(IDictionary<string, string> tags, IEnumerable<Point> points)
+        public Way(Tile tile, IDictionary<string, string> tags, IEnumerable<Point> points)
         {
             Tags = ImmutableDictionary.ToImmutableDictionary(tags);
             Points = ImmutableList.ToImmutableList(points);
             Segments = ImmutableList.ToImmutableList(
                 Enumerable.Range(0, Points.Count - 1).Select(index => {
-                    return new Line(Points[index], Points[index + 1]);
+                    return new Line(tile, Points[index], Points[index + 1]);
                 })
             );
             Points[0].AngleRad = Segments[0].AngleRad;

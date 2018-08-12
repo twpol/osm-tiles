@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,13 +30,6 @@ namespace osm_road_overlay.Controllers.Overlays
             5,
         });
 
-        static PointF GetPointFromNode(Tile tile, Point point) {
-            return new PointF(
-                (float)(256 * (point.Lon - tile.NW.Lon) / (tile.SE.Lon - tile.NW.Lon)),
-                (float)(256 * (point.Lat - tile.NW.Lat) / (tile.SE.Lat - tile.NW.Lat))
-            );
-        }
-
         static SizeF GetRoadOffset(float imageScale, Line line, Point point) {
             var angleDifference = Math.Abs(line.AngleRad - point.AngleRad);
             var lengthExtension = (float)Math.Cos(angleDifference);
@@ -44,7 +37,7 @@ namespace osm_road_overlay.Controllers.Overlays
             var cos = (float)Math.Cos(Math.PI / 2 - point.AngleRad);
             return new SizeF() {
                 Width = imageScale / lengthExtension * cos,
-                Height = imageScale / lengthExtension * sin
+                Height = -imageScale / lengthExtension * sin
             };
         }
 
@@ -75,8 +68,8 @@ namespace osm_road_overlay.Controllers.Overlays
                     var road = GetRoad(way);
                     if (road.Lanes.Count > 0) {
                         RenderWaySegments(way, (line) => {
-                            var point1 = GetPointFromNode(tile, line.Start);
-                            var point2 = GetPointFromNode(tile, line.End);
+                            var point1 = tile.GetPointFromPoint(line.Start);
+                            var point2 = tile.GetPointFromPoint(line.End);
                             var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
                             var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
 
@@ -102,8 +95,8 @@ namespace osm_road_overlay.Controllers.Overlays
                     var road = GetRoad(way);
                     if (road.Lanes.Count > 0) {
                         RenderWaySegments(way, (line) => {
-                            var point1 = GetPointFromNode(tile, line.Start);
-                            var point2 = GetPointFromNode(tile, line.End);
+                            var point1 = tile.GetPointFromPoint(line.Start);
+                            var point2 = tile.GetPointFromPoint(line.End);
                             var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
                             var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
 
@@ -129,8 +122,8 @@ namespace osm_road_overlay.Controllers.Overlays
                     var road = GetRoad(way);
                     if (road.Lanes.Count > 0) {
                         RenderWaySegments(way, (line) => {
-                            var point1 = GetPointFromNode(tile, line.Start);
-                            var point2 = GetPointFromNode(tile, line.End);
+                            var point1 = tile.GetPointFromPoint(line.Start);
+                            var point2 = tile.GetPointFromPoint(line.End);
                             var offsetDir1 = GetRoadOffset(tile.ImageScale, line, line.Start);
                             var offsetDir2 = GetRoadOffset(tile.ImageScale, line, line.End);
 

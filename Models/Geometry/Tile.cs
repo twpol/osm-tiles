@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
+using SixLabors.Primitives;
 
 namespace osm_road_overlay.Models.Geometry
 {
@@ -24,6 +25,14 @@ namespace osm_road_overlay.Models.Geometry
             NW = GetPointFromTile(zoom, x, y);
             SE = GetPointFromTile(zoom, x + 1, y + 1);
             ImageScale = (float)(1 / (C * Math.Cos(NW.Lat * Math.PI / 180) / Math.Pow(2, zoom + 8)));
+        }
+
+        public PointF GetPointFromPoint(Point point)
+        {
+            return new PointF(
+                (float)(256 * (point.Lon - NW.Lon) / (SE.Lon - NW.Lon)),
+                (float)(256 * (point.Lat - NW.Lat) / (SE.Lat - NW.Lat))
+            );
         }
 
         public async Task LoadGeometry()

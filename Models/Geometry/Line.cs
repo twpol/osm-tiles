@@ -9,11 +9,13 @@ namespace osm_road_overlay.Models.Geometry
         public Point End { get; }
         public double AngleRad { get; }
 
-        public Line(Point start, Point end)
+        public Line(Tile tile, Point start, Point end)
         {
             Start = start;
             End = end;
-            AngleRad = Math.Atan2(end.Lat - start.Lat, end.Lon - start.Lon);
+            var pointStart = tile.GetPointFromPoint(start);
+            var pointEnd = tile.GetPointFromPoint(end);
+            AngleRad = Math.Atan2(pointEnd.Y - pointStart.Y, pointEnd.X - pointStart.X);
         }
     }
 }
