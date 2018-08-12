@@ -36,8 +36,8 @@ namespace osm_road_overlay.Controllers.Overlays
             var sin = (float)Math.Sin(Math.PI / 2 - point.AngleRad);
             var cos = (float)Math.Cos(Math.PI / 2 - point.AngleRad);
             return new SizeF() {
-                Width = imageScale / lengthExtension * cos,
-                Height = -imageScale / lengthExtension * sin
+                Width = -imageScale / lengthExtension * cos,
+                Height = imageScale / lengthExtension * sin
             };
         }
 
