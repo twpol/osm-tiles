@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/osm-road-overlay.csproj"
+                "${workspaceFolder}/osm-tiles.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
