@@ -13,15 +13,15 @@ A live version is running at https://osm-tiles.james-ross.co.uk/.
 This tile set is an overlay (meaning the tiles are transparent where there is no data) which renders roads (highways) from OpenStreetMap according to their various tags, including:
 
 - `sidewalk=both =left =right`
-- `cycleway=lane =opposite`
-- `cycleway:left=lane`
-- `cycleway:right=lane`
+- `cycleway=lane =opposite_lane`
+- `cycleway:left=lane =opposite_lane`
+- `cycleway:right=lane =opposite_lane`
 - `highway=motorway =trunk =primary =secondary =tertiary =unclassified =residential =service =motorway_link =trunk_link =primary_link =secondary_link =tertiary_link`
 - `lanes=*`
 - `oneway=yes`
-- `parking:lanes:both=parallel =diagonal =perpendicular`
-- `parking:lanes:left=parallel =diagonal =perpendicular`
-- `parking:lanes:right=parallel =diagonal =perpendicular`
+- `parking:lane:both=parallel =diagonal =perpendicular`
+- `parking:lane:left=parallel =diagonal =perpendicular`
+- `parking:lane:right=parallel =diagonal =perpendicular`
 - `layer=*`
 
 ### Limitations
