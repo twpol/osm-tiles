@@ -7,7 +7,6 @@ namespace osm_road_overlay.Models.Geometry
         public static readonly Angle Zero = new Angle(0);
         public static readonly Angle QuarterTurn = new Angle(Math.PI / 2);
         public static readonly Angle HalfTurn = new Angle(Math.PI);
-        public static readonly Angle FullTurn = new Angle(Math.PI * 2);
 
         public readonly double Radians;
 
