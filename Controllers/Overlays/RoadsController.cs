@@ -210,14 +210,16 @@ namespace osm_road_overlay.Controllers.Overlays
                 lanes.Insert(0, new Lane(LaneType.Cycle, LaneWidthCycle));
                 lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
                 center += LaneWidthCycle;
-            } else if (way.Tags.GetValueOrDefault("cycleway", "no") == "opposite") {
+            } else if (way.Tags.GetValueOrDefault("cycleway", "no") == "opposite_lane") {
                 lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
             } else {
-                if (way.Tags.GetValueOrDefault("cycleway:left", "no") == "lane") {
+                var sidecycle = way.Tags.GetValueOrDefault("cycleway:left", "no");
+                if (sidecycle == "lane" || sidecycle == "opposite_lane") {
                     lanes.Insert(0, new Lane(LaneType.Cycle, LaneWidthCycle));
                     center += LaneWidthCycle;
                 }
-                if (way.Tags.GetValueOrDefault("cycleway:right", "no") == "lane") {
+                sidecycle = way.Tags.GetValueOrDefault("cycleway:right", "no");
+                if (sidecycle == "lane" || sidecycle == "opposite_lane") {
                     lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
                 }
             }
