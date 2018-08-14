@@ -206,22 +206,22 @@ namespace osm_road_overlay.Controllers.Overlays
             }
             center += LaneWidthCar * drivingLanes / 2;
 
-            if (way.Tags.GetValueOrDefault("cycleway", "no") == "lane" ||
-                way.Tags.GetValueOrDefault("cycleway:both", "no") == "lane" ||
-                way.Tags.GetValueOrDefault("cycleway:both", "no") == "opposite_lane") {
+            var cycleway = way.Tags.GetValueOrDefault("cycleway", "no");
+            var cyclewayBoth = way.Tags.GetValueOrDefault("cycleway:both", "no");
+            if (cycleway == "lane" || cyclewayBoth == "lane") {
                 lanes.Insert(0, new Lane(LaneType.Cycle, LaneWidthCycle));
                 lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
                 center += LaneWidthCycle;
-            } else if (way.Tags.GetValueOrDefault("cycleway", "no") == "opposite_lane") {
+            } else if (cycleway == "opposite_lane") {
                 lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
             } else {
-                var sidecycle = way.Tags.GetValueOrDefault("cycleway:left", "no");
-                if (sidecycle == "lane" || sidecycle == "opposite_lane") {
+                var cyclewayLeft = way.Tags.GetValueOrDefault("cycleway:left", "no");
+                var cyclewayRight = way.Tags.GetValueOrDefault("cycleway:right", "no");
+                if (cyclewayLeft == "lane" || cyclewayRight == "opposite_lane") {
                     lanes.Insert(0, new Lane(LaneType.Cycle, LaneWidthCycle));
                     center += LaneWidthCycle;
                 }
-                sidecycle = way.Tags.GetValueOrDefault("cycleway:right", "no");
-                if (sidecycle == "lane" || sidecycle == "opposite_lane") {
+                if (cyclewayLeft == "opposite_lane" || cyclewayRight == "lane") {
                     lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
                 }
             }
