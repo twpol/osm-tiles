@@ -4,6 +4,8 @@ A tile renderer for OpenStreetMap that provides the following tile sets:
 
 - Road overlay
 
+[![Build status](https://ci.appveyor.com/api/projects/status/n7l46b5cjdrxhtmg?svg=true)](https://ci.appveyor.com/project/twpol/osm-tiles)
+
 ## Live slippy map and tile server
 
 A live version is running at https://osm-tiles.james-ross.co.uk/.
