@@ -208,7 +208,7 @@ namespace osm_road_overlay.Controllers.Overlays
 
             var cycleway = way.Tags.GetValueOrDefault("cycleway", "no");
             var cyclewayBoth = way.Tags.GetValueOrDefault("cycleway:both", "no");
-            if (cycleway == "lane" || cyclewayBoth == "lane") {
+            if (cycleway == "lane" || cyclewayBoth == "lane" || cyclewayBoth == "opposite_lane") {
                 lanes.Insert(0, new Lane(LaneType.Cycle, LaneWidthCycle));
                 lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
                 center += LaneWidthCycle;
@@ -217,11 +217,11 @@ namespace osm_road_overlay.Controllers.Overlays
             } else {
                 var cyclewayLeft = way.Tags.GetValueOrDefault("cycleway:left", "no");
                 var cyclewayRight = way.Tags.GetValueOrDefault("cycleway:right", "no");
-                if (cyclewayLeft == "lane" || cyclewayRight == "opposite_lane") {
+                if (cyclewayLeft == "lane" || cyclewayLeft == "opposite_lane") {
                     lanes.Insert(0, new Lane(LaneType.Cycle, LaneWidthCycle));
                     center += LaneWidthCycle;
                 }
-                if (cyclewayLeft == "opposite_lane" || cyclewayRight == "lane") {
+                if (cyclewayRight == "lane" || cyclewayRight == "opposite_lane") {
                     lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
                 }
             }
