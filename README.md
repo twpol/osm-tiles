@@ -16,6 +16,7 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 
 - `sidewalk=both =left =right`
 - `cycleway=lane =opposite_lane`
+- `cycleway:both=lane =opposite_lane`
 - `cycleway:left=lane =opposite_lane`
 - `cycleway:right=lane =opposite_lane`
 - `highway=motorway =trunk =primary =secondary =tertiary =unclassified =residential =service =motorway_link =trunk_link =primary_link =secondary_link =tertiary_link`
