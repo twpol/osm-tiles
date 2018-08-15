@@ -51,6 +51,7 @@ namespace osm_road_overlay.Controllers.Overlays
             "Car|Cycle",
             "Car|Parking",
             "Cycle|Parking",
+            "Cycle|Cycle",
         };
 
         static SizeF GetRoadOffset(Tile tile, Line line, Point point) {
@@ -220,9 +221,16 @@ namespace osm_road_overlay.Controllers.Overlays
                 if (cyclewayLeft == "lane" || cyclewayLeft == "opposite_lane") {
                     lanes.Insert(0, new Lane(LaneType.Cycle, LaneWidthCycle));
                     center += LaneWidthCycle;
+                    if (way.Tags.GetValueOrDefault("cycleway:left:oneway", "yes") == "no") {
+                        lanes.Insert(0, new Lane(LaneType.Cycle, LaneWidthCycle));
+                        center += LaneWidthCycle;
+                    }
                 }
                 if (cyclewayRight == "lane" || cyclewayRight == "opposite_lane") {
                     lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
+                    if (way.Tags.GetValueOrDefault("cycleway:right:oneway", "yes") == "no") {
+                        lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
+                    }
                 }
             }
 
