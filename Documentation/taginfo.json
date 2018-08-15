@@ -38,8 +38,22 @@
             "description": "Roads: Displays a cycle lane on both sides of the road"
         },
         {
+            "key": "cycleway:both",
+            "value": "lane",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a cycle lane on both sides of the road"
+        },
+        {
+            "key": "cycleway:both",
+            "value": "opposite_lane",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a cycle lane on both sides of the road"
+        },
+        {
             "key": "cycleway",
-            "value": "opposite",
+            "value": "opposite_lane",
             "object_types": ["way"],
             "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
             "description": "Roads: Displays a cycle lane on the right side of the road"
@@ -52,8 +66,22 @@
             "description": "Roads: Displays a cycle lane on the left side of the road"
         },
         {
+            "key": "cycleway:left",
+            "value": "opposite_lane",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a cycle lane on the left side of the road"
+        },
+        {
             "key": "cycleway:right",
             "value": "lane",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a cycle lane on the right side of the road"
+        },
+        {
+            "key": "cycleway:right",
+            "value": "opposite_lane",
             "object_types": ["way"],
             "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
             "description": "Roads: Displays a cycle lane on the right side of the road"
