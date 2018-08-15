@@ -258,7 +258,8 @@ namespace osm_road_overlay.Controllers.Overlays
         }
 
         static int GetNumberOfDrivingLanes(Way way) {
-            var defaultLanes = way.Tags.GetValueOrDefault("oneway", "no") == "yes" ? "1" : "2";
+            var oneway = way.Tags.GetValueOrDefault("oneway", "no");
+            var defaultLanes = oneway == "yes" || oneway == "-1" ? "1" : "2";
             return int.Parse(way.Tags.GetValueOrDefault("lanes", defaultLanes));
         }
 
