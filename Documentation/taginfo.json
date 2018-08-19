@@ -73,6 +73,13 @@
             "description": "Roads: Displays a cycle lane on the left side of the road"
         },
         {
+            "key": "cycleway:left:oneway",
+            "value": "no",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a dual cycle lane on the left side of the road (if cycleway:left=lane/opposite_lane)"
+        },
+        {
             "key": "cycleway:right",
             "value": "lane",
             "object_types": ["way"],
@@ -85,6 +92,13 @@
             "object_types": ["way"],
             "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
             "description": "Roads: Displays a cycle lane on the right side of the road"
+        },
+        {
+            "key": "cycleway:right:oneway",
+            "value": "no",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a dual cycle lane on the right side of the road (if cycleway:right=lane/opposite_lane)"
         },
         {
             "key": "highway",
@@ -100,6 +114,12 @@
         {
             "key": "oneway",
             "value": "yes",
+            "object_types": ["way"],
+            "description": "Roads: Alters the road rendering to be unidirectional; default 1 or 2 lanes"
+        },
+        {
+            "key": "oneway",
+            "value": "-1",
             "object_types": ["way"],
             "description": "Roads: Alters the road rendering to be unidirectional; default 1 or 2 lanes"
         },
