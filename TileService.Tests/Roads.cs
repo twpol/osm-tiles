@@ -45,5 +45,86 @@ namespace TileService.Tests
                 GetStraightRoadText("highway=road")
             );
         }
+
+        [Fact]
+        public void HighwayRoadLanes1()
+        {
+            Assert.Equal(
+                "Road(Edge 0.0m|Car 3.0m|Edge 0.0m, Center=1.5m)",
+                GetStraightRoadText("highway=road", "lanes=1")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadLanes2()
+        {
+            Assert.Equal(
+                "Road(Edge 0.0m|Car 3.0m|Car 3.0m|Edge 0.0m, Center=3.0m)",
+                GetStraightRoadText("highway=road", "lanes=2")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadLanes3()
+        {
+            Assert.Equal(
+                "Road(Edge 0.0m|Car 3.0m|Car 3.0m|Car 3.0m|Edge 0.0m, Center=4.5m)",
+                GetStraightRoadText("highway=road", "lanes=3")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadLanes4()
+        {
+            Assert.Equal(
+                "Road(Edge 0.0m|Car 3.0m|Car 3.0m|Car 3.0m|Car 3.0m|Edge 0.0m, Center=6.0m)",
+                GetStraightRoadText("highway=road", "lanes=4")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadOnewayYes()
+        {
+            Assert.Equal(
+                "Road(Edge 0.0m|Car 3.0m|Edge 0.0m, Center=1.5m)",
+                GetStraightRoadText("highway=road", "oneway=yes")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadOnewayYesLanes1()
+        {
+            Assert.Equal(
+                "Road(Edge 0.0m|Car 3.0m|Edge 0.0m, Center=1.5m)",
+                GetStraightRoadText("highway=road", "oneway=yes", "lanes=1")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadOnewayYesLanes2()
+        {
+            Assert.Equal(
+                "Road(Edge 0.0m|Car 3.0m|Car 3.0m|Edge 0.0m, Center=3.0m)",
+                GetStraightRoadText("highway=road", "oneway=yes", "lanes=2")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadOnewayYesLanes3()
+        {
+            Assert.Equal(
+                "Road(Edge 0.0m|Car 3.0m|Car 3.0m|Car 3.0m|Edge 0.0m, Center=4.5m)",
+                GetStraightRoadText("highway=road", "oneway=yes", "lanes=3")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadOnewayYesLanes4()
+        {
+            Assert.Equal(
+                "Road(Edge 0.0m|Car 3.0m|Car 3.0m|Car 3.0m|Car 3.0m|Edge 0.0m, Center=6.0m)",
+                GetStraightRoadText("highway=road", "oneway=yes", "lanes=4")
+            );
+        }
     }
 }
