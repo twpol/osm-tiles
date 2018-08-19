@@ -62,7 +62,7 @@ namespace TileService.Models.Geometry
         public ImmutableList<Way> Roads { get; private set; }
         public ImmutableList<Junction> RoadJunctions { get; private set; }
 
-        Tile(int zoom, int x, int y)
+        public Tile(int zoom, int x, int y)
         {
             Zoom = zoom;
             X = x;

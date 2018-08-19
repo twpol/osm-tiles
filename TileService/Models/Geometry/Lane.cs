@@ -10,6 +10,11 @@ namespace TileService.Models.Geometry
             Type = type;
             Width = width;
         }
+
+        public override string ToString()
+        {
+            return $"{Type} {Width:F1}m";
+        }
     }
 
     public enum LaneType

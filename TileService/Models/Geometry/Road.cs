@@ -13,5 +13,10 @@ namespace TileService.Models.Geometry
             Lanes = ImmutableList.ToImmutableList(lanes);
             Center = center;
         }
+
+        public override string ToString()
+        {
+            return $"Road({string.Join("|", Lanes)}, Center={Center:F1}m)";
+        }
     }
 }
