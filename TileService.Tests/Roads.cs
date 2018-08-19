@@ -205,84 +205,84 @@ namespace TileService.Tests
             // Can't be distinguished from M3a: Assert.Equal(road, GetStraightRoadText("highway=road", "oneway=yes", "oneway:bicycle=no", "cycleway=opposite_lane"));
         }
 
-        [Fact]
-        public void WikiBicycleExampleT1MultiWay1()
-        {
-            Assert.Equal(
-                "Road(Edge 0.0m|Car 3.0m|Car 3.0m|Edge 0.0m, Center=3.0m)",
-                GetStraightRoadText("highway=road", "bicycle=use_sidepath")
-            );
-        }
+        // [Fact]
+        // public void WikiBicycleExampleT1MultiWay1()
+        // {
+        //     Assert.Equal(
+        //         "Road(Edge 0.0m|Car 3.0m|Car 3.0m|Edge 0.0m, Center=3.0m)",
+        //         GetStraightRoadText("highway=road", "bicycle=use_sidepath")
+        //     );
+        // }
 
-        [Fact]
-        public void WikiBicycleExampleT1MultiWay2()
-        {
-            Assert.Equal(
-                "Road(Edge 0.0m|Cycle 1.0m|Edge 0.0m, Center=0.5m)",
-                GetStraightRoadText("highway=cycleway", "oneway=yes")
-            );
-        }
+        // [Fact]
+        // public void WikiBicycleExampleT1MultiWay2()
+        // {
+        //     Assert.Equal(
+        //         "Road(Edge 0.0m|Cycle 1.0m|Edge 0.0m, Center=0.5m)",
+        //         GetStraightRoadText("highway=cycleway", "oneway=yes")
+        //     );
+        // }
 
-        [Fact]
-        public void WikiBicycleExampleT1SingleWay()
-        {
-            Assert.Equal(
-                "Road(Edge 0.0m|Cycle 1.0m|Verge 0.5m|Car 3.0m|Car 3.0m|Verge 0.5m|Cycle 1.0m|Edge 0.0m, Center=4.5m)",
-                GetStraightRoadText("highway=road", "cycleway=track")
-            );
-        }
+        // [Fact]
+        // public void WikiBicycleExampleT1SingleWay()
+        // {
+        //     Assert.Equal(
+        //         "Road(Edge 0.0m|Cycle 1.0m|Verge 0.5m|Car 3.0m|Car 3.0m|Verge 0.5m|Cycle 1.0m|Edge 0.0m, Center=4.5m)",
+        //         GetStraightRoadText("highway=road", "cycleway=track")
+        //     );
+        // }
 
-        // WikiBicycleExampleT2MultiWay1 would be identical to WikiBicycleExampleT1MultiWay1
+        // // WikiBicycleExampleT2MultiWay1 would be identical to WikiBicycleExampleT1MultiWay1
 
-        [Fact]
-        public void WikiBicycleExampleT2MultiWay2()
-        {
-            Assert.Equal(
-                "Road(Edge 0.0m|Cycle 1.0m|Cycle 1.0m|Edge 0.0m, Center=1.0m)",
-                GetStraightRoadText("highway=cycleway", "oneway=no")
-            );
-        }
+        // [Fact]
+        // public void WikiBicycleExampleT2MultiWay2()
+        // {
+        //     Assert.Equal(
+        //         "Road(Edge 0.0m|Cycle 1.0m|Cycle 1.0m|Edge 0.0m, Center=1.0m)",
+        //         GetStraightRoadText("highway=cycleway", "oneway=no")
+        //     );
+        // }
 
-        [Fact]
-        public void WikiBicycleExampleT2SingleWay()
-        {
-            Assert.Equal(
-                "Road(Edge 0.0m|Car 3.0m|Car 3.0m|Verge 0.5m|Cycle 1.0m|Cycle 1.0m|Edge 0.0m, Center=3.0m)",
-                GetStraightRoadText("highway=road", "cycleway:right=track", "cycleway:right:oneway=no")
-            );
-        }
+        // [Fact]
+        // public void WikiBicycleExampleT2SingleWay()
+        // {
+        //     Assert.Equal(
+        //         "Road(Edge 0.0m|Car 3.0m|Car 3.0m|Verge 0.5m|Cycle 1.0m|Cycle 1.0m|Edge 0.0m, Center=3.0m)",
+        //         GetStraightRoadText("highway=road", "cycleway:right=track", "cycleway:right:oneway=no")
+        //     );
+        // }
 
-        [Fact]
-        public void WikiBicycleExampleT3MultiWay1()
-        {
-            Assert.Equal(
-                "Road(Edge 0.0m|Car 3.0m|Edge 0.0m, Center=1.5m)",
-                GetStraightRoadText("highway=road", "oneway=yes", "bicycle=use_sidepath")
-            );
-        }
+        // [Fact]
+        // public void WikiBicycleExampleT3MultiWay1()
+        // {
+        //     Assert.Equal(
+        //         "Road(Edge 0.0m|Car 3.0m|Edge 0.0m, Center=1.5m)",
+        //         GetStraightRoadText("highway=road", "oneway=yes", "bicycle=use_sidepath")
+        //     );
+        // }
 
-        // WikiBicycleExampleT3MultiWay2 would be identical to WikiBicycleExampleT2MultiWay2
+        // // WikiBicycleExampleT3MultiWay2 would be identical to WikiBicycleExampleT2MultiWay2
 
-        [Fact]
-        public void WikiBicycleExampleT3SingleWay()
-        {
-            Assert.Equal(
-                "Road(Edge 0.0m|Car 3.0m|Verge 0.5m|Cycle 1.0m|Cycle 1.0m|Edge 0.0m, Center=1.5m)",
-                GetStraightRoadText("highway=road", "oneway=yes", "cycleway:right=track", "oneway:bicycle=no")
-            );
-        }
+        // [Fact]
+        // public void WikiBicycleExampleT3SingleWay()
+        // {
+        //     Assert.Equal(
+        //         "Road(Edge 0.0m|Car 3.0m|Verge 0.5m|Cycle 1.0m|Cycle 1.0m|Edge 0.0m, Center=1.5m)",
+        //         GetStraightRoadText("highway=road", "oneway=yes", "cycleway:right=track", "oneway:bicycle=no")
+        //     );
+        // }
 
-        // WikiBicycleExampleT4MultiWay1 would be identical to WikiBicycleExampleT1MultiWay1
+        // // WikiBicycleExampleT4MultiWay1 would be identical to WikiBicycleExampleT1MultiWay1
 
-        // WikiBicycleExampleT4MultiWay2 would be identical to WikiBicycleExampleT1MultiWay2
+        // // WikiBicycleExampleT4MultiWay2 would be identical to WikiBicycleExampleT1MultiWay2
 
-        [Fact]
-        public void WikiBicycleExampleT4SingleWay()
-        {
-            Assert.Equal(
-                "Road(Edge 0.0m|Car 3.0m|Car 3.0m|Verge 0.5m|Cycle 1.0m|Edge 0.0m, Center=3.0m)",
-                GetStraightRoadText("highway=road", "cycleway:right=track")
-            );
-        }
+        // [Fact]
+        // public void WikiBicycleExampleT4SingleWay()
+        // {
+        //     Assert.Equal(
+        //         "Road(Edge 0.0m|Car 3.0m|Car 3.0m|Verge 0.5m|Cycle 1.0m|Edge 0.0m, Center=3.0m)",
+        //         GetStraightRoadText("highway=road", "cycleway:right=track")
+        //     );
+        // }
     }
 }
