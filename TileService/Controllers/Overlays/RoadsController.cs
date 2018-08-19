@@ -6,8 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Drawing;
-using SixLabors.ImageSharp.Processing.Drawing.Pens;
 using TileService.Models.Geometry;
 using PointF = SixLabors.Primitives.PointF;
 using SizeF = SixLabors.Primitives.SizeF;
