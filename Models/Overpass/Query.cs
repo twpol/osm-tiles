@@ -8,7 +8,7 @@ namespace osm_road_overlay.Models.Overpass
 {
     public static class Query
     {
-        const string OverpassAPIEndpoint = "http://overpass-api.de/api/interpreter";
+        const string OverpassAPIEndpoint = "https://overpass-api.de/api/interpreter";
 
         static readonly HttpClient Client = new HttpClient();
 
