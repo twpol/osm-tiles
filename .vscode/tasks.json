@@ -2,12 +2,30 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "label": "build",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/osm-tiles.csproj"
+                "${workspaceFolder}/osm-tiles.sln"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "label": "test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "${workspaceFolder}/TileService.Tests/TileService.Tests.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using osm_road_overlay.Models.Geometry;
-using osm_road_overlay.Models.Overpass;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Drawing;
 using SixLabors.ImageSharp.Processing.Drawing.Pens;
+using TileService.Models.Geometry;
 using PointF = SixLabors.Primitives.PointF;
 using SizeF = SixLabors.Primitives.SizeF;
 
-namespace osm_road_overlay.Controllers.Overlays
+namespace TileService.Controllers.Overlays
 {
     [Route("overlays/roads")]
     public class RoadsController : Controller

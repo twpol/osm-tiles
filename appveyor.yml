@@ -1,5 +1,5 @@
 version: 1.0.{build}
 build_script:
-- ps: dotnet publish --configuration Release
+- cmd: dotnet publish --configuration Release
 artifacts:
-- path: bin\Release\netcoreapp2.1\publish
+- path: TileService\bin\Release\netcoreapp2.1\publish

@@ -1,4 +1,4 @@
-namespace osm_road_overlay.Models.Overpass
+namespace TileService.Models.Overpass
 {
     public struct Response
     {

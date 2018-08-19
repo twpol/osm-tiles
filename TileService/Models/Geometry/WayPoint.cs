@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace osm_road_overlay.Models.Geometry
+namespace TileService.Models.Geometry
 {
     public class WayPoint
     {

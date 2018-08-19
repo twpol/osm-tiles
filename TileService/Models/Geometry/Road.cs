@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace osm_road_overlay.Models.Geometry
+namespace TileService.Models.Geometry
 {
     public class Road
     {

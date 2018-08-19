@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using SixLabors.Primitives;
 
-namespace osm_road_overlay.Models.Geometry
+namespace TileService.Models.Geometry
 {
     public class Tile
     {

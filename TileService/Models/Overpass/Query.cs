@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace osm_road_overlay.Models.Overpass
+namespace TileService.Models.Overpass
 {
     public static class Query
     {

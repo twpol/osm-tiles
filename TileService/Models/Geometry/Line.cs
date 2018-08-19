@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace osm_road_overlay.Models.Geometry
+namespace TileService.Models.Geometry
 {
     public class Line
     {
