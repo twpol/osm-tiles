@@ -20,7 +20,9 @@ namespace TileService.Controllers.Overlays
         const int LaneZoomMinimum = 18;
         static readonly Rgba32 SidewalkColor = new Rgba32(128, 128, 128);
         static readonly Pen<Rgba32> KerbLine = new Pen<Rgba32>(new Rgba32(64, 64, 64), 1);
-        static readonly Rgba32 RoadColor = new Rgba32(192, 192, 192);
+        static readonly Rgba32 ParkingColor = new Rgba32(128, 128, 192);
+        static readonly Rgba32 CycleLaneColor = new Rgba32(128, 192, 128);
+        static readonly Rgba32 CarLaneColor = new Rgba32(192, 192, 192);
         static readonly Pen<Rgba32> LaneLine = new Pen<Rgba32>(new Rgba32(255, 255, 255), 1, new float[] {
             10,
             5,
@@ -101,13 +103,7 @@ namespace TileService.Controllers.Overlays
                                 {
                                     var offset2 = offset1 + lane.Width;
                                     if (lane.Type == LaneType.Sidewalk) {
-                                        context.FillPolygon(
-                                            SidewalkColor,
-                                            Offset(point1, offsetDir1, offset1),
-                                            Offset(point1, offsetDir1, offset2),
-                                            Offset(point2, offsetDir2, offset2),
-                                            Offset(point2, offsetDir2, offset1)
-                                        );
+                                        RenderLane(context, SidewalkColor, point1, point2, offsetDir1, offsetDir2, offset1, offset2);
                                     }
                                     offset1 = offset2;
                                 }
@@ -127,14 +123,12 @@ namespace TileService.Controllers.Overlays
                                 foreach (var lane in road.Lanes)
                                 {
                                     var offset2 = offset1 + lane.Width;
-                                    if (lane.Type == LaneType.Parking || lane.Type == LaneType.Cycle || lane.Type == LaneType.Car) {
-                                        context.FillPolygon(
-                                            RoadColor,
-                                            Offset(point1, offsetDir1, offset1),
-                                            Offset(point1, offsetDir1, offset2),
-                                            Offset(point2, offsetDir2, offset2),
-                                            Offset(point2, offsetDir2, offset1)
-                                        );
+                                    if (lane.Type == LaneType.Parking) {
+                                        RenderLane(context, ParkingColor, point1, point2, offsetDir1, offsetDir2, offset1, offset2);
+                                    } else if (lane.Type == LaneType.Cycle) {
+                                        RenderLane(context, CycleLaneColor, point1, point2, offsetDir1, offsetDir2, offset1, offset2);
+                                    } else if (lane.Type == LaneType.Car) {
+                                        RenderLane(context, CarLaneColor, point1, point2, offsetDir1, offsetDir2, offset1, offset2);
                                     }
                                     offset1 = offset2;
                                 }
@@ -189,6 +183,17 @@ namespace TileService.Controllers.Overlays
             stream.Position = 0;
 
             return File(stream, "image/png");
+        }
+
+        static void RenderLane(IImageProcessingContext<Rgba32> context, Rgba32 color, PointF point1, PointF point2, SizeF offsetDir1, SizeF offsetDir2, float offset1, float offset2)
+        {
+            context.FillPolygon(
+                color,
+                Offset(point1, offsetDir1, offset1),
+                Offset(point1, offsetDir1, offset2),
+                Offset(point2, offsetDir2, offset2),
+                Offset(point2, offsetDir2, offset1)
+            );
         }
 
         static void RenderRoads(Tile tile, string layer, Action<Way> render)
