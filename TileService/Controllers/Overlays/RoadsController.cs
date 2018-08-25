@@ -15,6 +15,9 @@ namespace TileService.Controllers.Overlays
     [Route("overlays/roads")]
     public class RoadsController : Controller
     {
+        const int ZoomMinimum = 16;
+        const int ZoomMaximum = 22;
+        const int LaneZoomMinimum = 18;
         static readonly Rgba32 SidewalkColor = new Rgba32(128, 128, 128);
         static readonly Pen<Rgba32> KerbLine = new Pen<Rgba32>(new Rgba32(64, 64, 64), 1);
         static readonly Rgba32 RoadColor = new Rgba32(192, 192, 192);
@@ -72,7 +75,7 @@ namespace TileService.Controllers.Overlays
         [HttpGet("{zoom}/{x}/{y}.png")]
         public async Task<ActionResult> Get(int zoom, int x, int y)
         {
-            if (zoom < 16 || zoom > 22) {
+            if (zoom < ZoomMinimum || zoom > ZoomMaximum) {
                 return BadRequest();
             }
 
@@ -138,41 +141,43 @@ namespace TileService.Controllers.Overlays
                             });
                         }
                     });
-                    RenderRoads(tile, layer, (way) => {
-                        var road = way.Road;
-                        if (road.Lanes.Count > 0) {
-                            RenderRoadSegments(way, (line) => {
-                                var point1 = tile.GetPointFromPoint(line.Start);
-                                var point2 = tile.GetPointFromPoint(line.End);
-                                var offsetDir1 = GetRoadOffset(tile, line, line.Start);
-                                var offsetDir2 = GetRoadOffset(tile, line, line.End);
+                    if (zoom >= LaneZoomMinimum) {
+                        RenderRoads(tile, layer, (way) => {
+                            var road = way.Road;
+                            if (road.Lanes.Count > 0) {
+                                RenderRoadSegments(way, (line) => {
+                                    var point1 = tile.GetPointFromPoint(line.Start);
+                                    var point2 = tile.GetPointFromPoint(line.End);
+                                    var offsetDir1 = GetRoadOffset(tile, line, line.Start);
+                                    var offsetDir2 = GetRoadOffset(tile, line, line.End);
 
-                                var offset = -road.Center + road.Lanes[0].Width;
-                                for (var laneIndex = 1; laneIndex < road.Lanes.Count; laneIndex++)
-                                {
-                                    var transition = $"{road.Lanes[laneIndex - 1].Type}|{road.Lanes[laneIndex].Type}";
+                                    var offset = -road.Center + road.Lanes[0].Width;
+                                    for (var laneIndex = 1; laneIndex < road.Lanes.Count; laneIndex++)
+                                    {
+                                        var transition = $"{road.Lanes[laneIndex - 1].Type}|{road.Lanes[laneIndex].Type}";
 
-                                    if (LaneTransitionKerb.Contains(transition)) {
-                                        context.DrawLines(
-                                            KerbLine,
-                                            Offset(point1, offsetDir1, offset),
-                                            Offset(point2, offsetDir2, offset)
-                                        );
+                                        if (LaneTransitionKerb.Contains(transition)) {
+                                            context.DrawLines(
+                                                KerbLine,
+                                                Offset(point1, offsetDir1, offset),
+                                                Offset(point2, offsetDir2, offset)
+                                            );
+                                        }
+
+                                        if (LaneTransitionLine.Contains(transition)) {
+                                            context.DrawLines(
+                                                LaneLine,
+                                                Offset(point1, offsetDir1, offset),
+                                                Offset(point2, offsetDir2, offset)
+                                            );
+                                        }
+
+                                        offset += road.Lanes[laneIndex].Width;
                                     }
-
-                                    if (LaneTransitionLine.Contains(transition)) {
-                                        context.DrawLines(
-                                            LaneLine,
-                                            Offset(point1, offsetDir1, offset),
-                                            Offset(point2, offsetDir2, offset)
-                                        );
-                                    }
-
-                                    offset += road.Lanes[laneIndex].Width;
-                                }
-                            });
-                        }
-                    });
+                                });
+                            }
+                        });
+                    }
                 }
             });
 
