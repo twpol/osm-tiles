@@ -109,8 +109,12 @@ namespace TileService.Models.Geometry
 
         static int GetNumberOfDrivingLanes(Way way)
         {
+            var highway = way.Tags.GetValueOrDefault("highway", "");
             var oneway = way.Tags.GetValueOrDefault("oneway", "no");
-            var defaultLanes = oneway == "yes" || oneway == "-1" ? "1" : "2";
+            var defaultLanes =
+                oneway == "yes" || oneway == "-1" ? "1" :
+                highway == "service" ? "1" :
+                "2";
             return int.Parse(way.Tags.GetValueOrDefault("lanes", defaultLanes));
         }
 
