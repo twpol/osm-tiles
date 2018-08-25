@@ -46,7 +46,7 @@
                 });
                 mapViewState = view[0].substr(4);
             } catch(error) {
-                mapViewState = '16/51.505000/-0.090000';
+                mapViewState = '18/51.505000/-0.090000';
             }
             var viewParts = mapViewState.split('/');
             map.setView([+viewParts[1], +viewParts[2]], +viewParts[0]);
@@ -64,16 +64,43 @@
             setUrlFromMapView(map);
         });
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        var baseNone = L.tileLayer('/blank-tile.png', {
+            attribution: '',
+            maxZoom: 22,
+            maxNativeZoom: 19,
+        }).addTo(map);
+
+        var baseOSMStandard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
             maxZoom: 22,
             maxNativeZoom: 19,
         }).addTo(map);
 
-        L.tileLayer('/overlays/roads/{z}/{x}/{y}.png', {
+        var baseOSMBlackAndWhite = L.tileLayer('https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
+            maxZoom: 22,
+            maxNativeZoom: 19,
+        });
+
+        var baseOSMNoLabels = L.tileLayer('https://tiles.wmflabs.org/osm-no-labels/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
+            maxZoom: 22,
+            maxNativeZoom: 19,
+        });
+
+        var overlayRoads = L.tileLayer('/overlays/roads/{z}/{x}/{y}.png', {
             attribution: 'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
             minZoom: 16,
             maxZoom: 22,
+        }).addTo(map);
+
+        L.control.layers({
+            "None": baseNone,
+            "Standard": baseOSMStandard,
+            "Black and white": baseOSMBlackAndWhite,
+            "No labels": baseOSMNoLabels,
+        }, {
+            "Roads": overlayRoads,
         }).addTo(map);
 
     </script>
