@@ -18,10 +18,12 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 - `cycleway=lane =opposite_lane`
 - `cycleway:both=lane =opposite_lane`
 - `cycleway:left=lane =opposite_lane`
+- `cycleway:left:oneway=no`
 - `cycleway:right=lane =opposite_lane`
+- `cycleway:right:oneway=no`
 - `highway=motorway =trunk =primary =secondary =tertiary =unclassified =residential =service =motorway_link =trunk_link =primary_link =secondary_link =tertiary_link`
 - `lanes=*`
-- `oneway=yes`
+- `oneway=yes =-1`
 - `parking:lane:both=parallel =diagonal =perpendicular`
 - `parking:lane:left=parallel =diagonal =perpendicular`
 - `parking:lane:right=parallel =diagonal =perpendicular`
