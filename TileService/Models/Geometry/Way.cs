@@ -44,35 +44,67 @@ namespace TileService.Models.Geometry
                 return new Road(lanes, center);
             }
 
-            for (var i = 0; i < drivingLanes; i++) {
-                lanes.Add(new Lane(LaneType.Car, LaneWidthCar));
+            var oneway = way.Tags.GetValueOrDefault("oneway", "no");
+            for (var i = 1; i <= drivingLanes; i++) {
+                // TODO: Support for lanes:forward and lanes:backward
+                lanes.Add(new Lane(
+                    LaneType.Car,
+                    oneway == "yes" ? LaneDirection.Forward :
+                    oneway == "-1" ? LaneDirection.Backward :
+                    i * 2 < drivingLanes + 1 ? LaneDirection.Forward :
+                    i * 2 == drivingLanes + 1 ? LaneDirection.Both :
+                    LaneDirection.Backward,
+                    LaneWidthCar
+                ));
             }
             center += LaneWidthCar * drivingLanes / 2;
 
+            // TODO: Support for driving on the right.
+            var twoway = way.Tags.GetValueOrDefault("oneway", "no") == "no";
             var cycleway = way.Tags.GetValueOrDefault("cycleway", "no");
             var cyclewayBoth = way.Tags.GetValueOrDefault("cycleway:both", "no");
-            if (cycleway == "lane" || cyclewayBoth == "lane" || cyclewayBoth == "opposite_lane") {
-                lanes.Insert(0, new Lane(LaneType.Cycle, LaneWidthCycle));
-                lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
-                center += LaneWidthCycle;
-            } else if (cycleway == "opposite_lane") {
-                lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
-            } else {
-                var cyclewayLeft = way.Tags.GetValueOrDefault("cycleway:left", "no");
-                var cyclewayRight = way.Tags.GetValueOrDefault("cycleway:right", "no");
-                if (cyclewayLeft == "lane" || cyclewayLeft == "opposite_lane") {
-                    lanes.Insert(0, new Lane(LaneType.Cycle, LaneWidthCycle));
-                    center += LaneWidthCycle;
-                    if (way.Tags.GetValueOrDefault("cycleway:left:oneway", "yes") == "no") {
-                        lanes.Insert(0, new Lane(LaneType.Cycle, LaneWidthCycle));
-                        center += LaneWidthCycle;
-                    }
+            var cyclewayLeft = way.Tags.GetValueOrDefault("cycleway:left", "no");
+            var cyclewayRight = way.Tags.GetValueOrDefault("cycleway:right", "no");
+            var cyclewayTwowayBoth = way.Tags.GetValueOrDefault("cycleway:both:oneway", "yes") == "no";
+            var cyclewayTwowayLeft = way.Tags.GetValueOrDefault("cycleway:left:oneway", "yes") == "no";
+            var cyclewayTwowayRight = way.Tags.GetValueOrDefault("cycleway:right:oneway", "yes") == "no";
+            if (cyclewayBoth != "no") {
+                cyclewayLeft = cyclewayBoth;
+                cyclewayRight = cyclewayBoth;
+            }
+            if (cyclewayTwowayBoth) {
+                cyclewayTwowayLeft = true;
+                cyclewayTwowayRight = true;
+            }
+            if (cycleway != "no") {
+                cyclewayLeft = cycleway;
+                if (twoway) cyclewayRight = cycleway;
+            }
+            if (cyclewayTwowayLeft) {
+                if (cyclewayLeft == "lane") {
+                    lanes.Insert(0, new Lane(LaneType.Cycle, LaneDirection.Backward, LaneWidthCycle));
+                    lanes.Insert(0, new Lane(LaneType.Cycle, LaneDirection.Forward, LaneWidthCycle));
+                    center += LaneWidthCycle * 2;
                 }
-                if (cyclewayRight == "lane" || cyclewayRight == "opposite_lane") {
-                    lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
-                    if (way.Tags.GetValueOrDefault("cycleway:right:oneway", "yes") == "no") {
-                        lanes.Add(new Lane(LaneType.Cycle, LaneWidthCycle));
-                    }
+            } else {
+                if (cyclewayLeft == "lane") {
+                    lanes.Insert(0, new Lane(LaneType.Cycle, LaneDirection.Forward, LaneWidthCycle));
+                    center += LaneWidthCycle;
+                } else if (cyclewayLeft == "opposite_lane") {
+                    lanes.Insert(0, new Lane(LaneType.Cycle, LaneDirection.Backward, LaneWidthCycle));
+                    center += LaneWidthCycle;
+                }
+            }
+            if (cyclewayTwowayRight) {
+                if (cyclewayRight == "lane") {
+                    lanes.Add(new Lane(LaneType.Cycle, LaneDirection.Forward, LaneWidthCycle));
+                    lanes.Add(new Lane(LaneType.Cycle, LaneDirection.Backward, LaneWidthCycle));
+                }
+            } else {
+                if (cyclewayRight == "lane") {
+                    lanes.Add(new Lane(LaneType.Cycle, twoway ? LaneDirection.Backward : LaneDirection.Forward, LaneWidthCycle));
+                } else if (cyclewayRight == "opposite_lane") {
+                    lanes.Add(new Lane(LaneType.Cycle, twoway ? LaneDirection.Forward : LaneDirection.Backward, LaneWidthCycle));
                 }
             }
 
