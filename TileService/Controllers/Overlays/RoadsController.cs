@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -181,6 +181,8 @@ namespace TileService.Controllers.Overlays
             var stream = new MemoryStream();
             image.SaveAsPng(stream);
             stream.Position = 0;
+
+            HttpContext.Response.Headers.Add("Cache-Control", new[] { "public", "max-age=43200" });
 
             return File(stream, "image/png");
         }
