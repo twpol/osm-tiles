@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -19,10 +19,10 @@ namespace TileService.Controllers.Overlays
         const int ZoomMaximum = 22;
         const int LaneZoomMinimum = 18;
         static readonly Rgba32 SidewalkColor = new Rgba32(128, 128, 128);
-        static readonly Pen<Rgba32> KerbLine = new Pen<Rgba32>(new Rgba32(64, 64, 64), 1);
-        static readonly Rgba32 ParkingColor = new Rgba32(128, 128, 192);
-        static readonly Rgba32 CycleLaneColor = new Rgba32(128, 192, 128);
-        static readonly Rgba32 CarLaneColor = new Rgba32(192, 192, 192);
+        static readonly Pen<Rgba32> KerbLine = new Pen<Rgba32>(new Rgba32(192, 192, 192), 1);
+        static readonly Rgba32 ParkingColor = new Rgba32(64, 64, 192);
+        static readonly Rgba32 CycleLaneColor = new Rgba32(64, 192, 64);
+        static readonly Rgba32 CarLaneColor = new Rgba32(0, 0, 0);
         static readonly Pen<Rgba32> LaneLine = new Pen<Rgba32>(new Rgba32(255, 255, 255), 1, new float[] {
             10,
             5,
