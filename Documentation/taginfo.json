@@ -34,76 +34,76 @@
             "key": "cycleway",
             "value": "lane",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/80C080&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/40C040&text=+",
             "description": "Roads: Displays a cycle lane on both sides of the road"
         },
         {
             "key": "cycleway:both",
             "value": "lane",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/80C080&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/40C040&text=+",
             "description": "Roads: Displays a cycle lane on both sides of the road"
         },
         {
             "key": "cycleway:both",
             "value": "opposite_lane",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/80C080&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/40C040&text=+",
             "description": "Roads: Displays a cycle lane on both sides of the road"
         },
         {
             "key": "cycleway",
             "value": "opposite_lane",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/80C080&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/40C040&text=+",
             "description": "Roads: Displays a cycle lane on the right side of the road"
         },
         {
             "key": "cycleway:left",
             "value": "lane",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/80C080&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/40C040&text=+",
             "description": "Roads: Displays a cycle lane on the left side of the road"
         },
         {
             "key": "cycleway:left",
             "value": "opposite_lane",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/80C080&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/40C040&text=+",
             "description": "Roads: Displays a cycle lane on the left side of the road"
         },
         {
             "key": "cycleway:left:oneway",
             "value": "no",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/80C080&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/40C040&text=+",
             "description": "Roads: Displays a dual cycle lane on the left side of the road (if cycleway:left=lane/opposite_lane)"
         },
         {
             "key": "cycleway:right",
             "value": "lane",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/80C080&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/40C040&text=+",
             "description": "Roads: Displays a cycle lane on the right side of the road"
         },
         {
             "key": "cycleway:right",
             "value": "opposite_lane",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/80C080&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/40C040&text=+",
             "description": "Roads: Displays a cycle lane on the right side of the road"
         },
         {
             "key": "cycleway:right:oneway",
             "value": "no",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/80C080&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/40C040&text=+",
             "description": "Roads: Displays a dual cycle lane on the right side of the road (if cycleway:right=lane/opposite_lane)"
         },
         {
             "key": "highway",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/000000&text=+",
             "description": "Roads: Defines the default behaviour of the road rendering, including whether it is shown"
         },
         {
@@ -127,63 +127,63 @@
             "key": "parking:lane:both",
             "value": "parallel",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/8080C0&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/4040C0&text=+",
             "description": "Roads: Displays a parallel parking lane on both sides of the road"
         },
         {
             "key": "parking:lane:both",
             "value": "diagonal",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/8080C0&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/4040C0&text=+",
             "description": "Roads: Displays a diagonal parking lane on both sides of the road"
         },
         {
             "key": "parking:lane:both",
             "value": "perpendicular",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/8080C0&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/4040C0&text=+",
             "description": "Roads: Displays a perpendicular parking lane on both sides of the road"
         },
         {
             "key": "parking:lane:left",
             "value": "parallel",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/8080C0&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/4040C0&text=+",
             "description": "Roads: Displays a parallel parking lane on the left side of the road"
         },
         {
             "key": "parking:lane:left",
             "value": "diagonal",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/8080C0&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/4040C0&text=+",
             "description": "Roads: Displays a diagonal parking lane on the left side of the road"
         },
         {
             "key": "parking:lane:left",
             "value": "perpendicular",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/8080C0&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/4040C0&text=+",
             "description": "Roads: Displays a perpendicular parking lane on the left side of the road"
         },
         {
             "key": "parking:lane:right",
             "value": "parallel",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/8080C0&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/4040C0&text=+",
             "description": "Roads: Displays a parallel parking lane on the right side of the road"
         },
         {
             "key": "parking:lane:right",
             "value": "diagonal",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/8080C0&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/4040C0&text=+",
             "description": "Roads: Displays a diagonal parking lane on the right side of the road"
         },
         {
             "key": "parking:lane:right",
             "value": "perpendicular",
             "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/8080C0&text=+",
+            "icon_url": "https://dummyimage.com/16x16.gif/4040C0&text=+",
             "description": "Roads: Displays a perpendicular parking lane on the right side of the road"
         },
         {
