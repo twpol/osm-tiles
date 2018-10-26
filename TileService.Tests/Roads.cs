@@ -6,7 +6,8 @@ namespace TileService.Tests
 {
     public class Roads
     {
-        static readonly RoadTile Tile = RoadTile.Cache.Get(18, 0, 0).Result;
+        // TODO: Fix bug in tile Overpass query that exceeds 180 range on bounding box so we can use (18, 0, 0) here.
+        static readonly RoadTile Tile = RoadTile.Cache.Get(18, 1 << 4, 1 << 4).Result;
         static readonly Point[] StraightWayPoints = {
             new Point(0, 0),
             new Point(0, 1),
