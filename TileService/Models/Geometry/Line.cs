@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TileService.Models.Common;
 
 namespace TileService.Models.Geometry
 {

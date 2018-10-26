@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using TileService.Models.Common;
 
 namespace TileService.Models.Overpass
 {
@@ -12,7 +13,7 @@ namespace TileService.Models.Overpass
 
         static readonly HttpClient Client = new HttpClient();
 
-        public static async Task<Response> Get(Geometry.Tile tile)
+        public static async Task<Response> GetHighways(Tile tile)
         {
             // Gather the bounding box with 20m extra around it for capturing edges.
             var bbox = GetBoundingBoxFromTile(tile);
@@ -32,7 +33,7 @@ namespace TileService.Models.Overpass
             }
         }
 
-        static string GetBoundingBoxFromTile(Geometry.Tile tile)
+        static string GetBoundingBoxFromTile(Tile tile)
         {
             var oversizeScale = 20 * tile.ImageScale / 256;
             var latExtra = oversizeScale * (tile.NW.Lat - tile.SE.Lat);

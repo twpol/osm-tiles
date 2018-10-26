@@ -4,76 +4,25 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using SixLabors.Primitives;
+using TileService.Models.Common;
 
 namespace TileService.Models.Geometry
 {
-    public class Tile
+    public class RoadTile : GenericTile<RoadTile>
     {
-        const double C = 40075016.686;
-        const int MaximumCachedZoomLevel = 14;
-        const int MaximumCachedTiles = 16;
-        static readonly Dictionary<string, Task<Tile>> TileCache = new Dictionary<string, Task<Tile>>();
-        static readonly List<string> TileCacheOrder = new List<string>();
+        public static readonly TileCache<RoadTile> Cache = new TileCache<RoadTile>(14, 16, 22, 16, (zoom, x, y) => new RoadTile(zoom, x, y), (zoom, x, y, copy) => new RoadTile(zoom, x, y, copy));
 
-        public static async Task<Tile> Get(int zoom, int x, int y)
-        {
-            Debug.Assert(zoom >= MaximumCachedZoomLevel, "Cannot load tile with zoom {zoom} < {MaximumCachedZoomLevel}");
-
-            var zoomDiff = zoom - MaximumCachedZoomLevel;
-            var cachedTile = await GetCached(MaximumCachedZoomLevel, (int)(x / Math.Pow(2, zoomDiff)), (int)(y / Math.Pow(2, zoomDiff)));
-
-            return new Tile(zoom, x, y, cachedTile);
-        }
-
-        static Task<Tile> GetCached(int zoom, int x, int y)
-        {
-            var key = $"{zoom}/{x}/{y}";
-            lock (TileCache) {
-                if (TileCache.TryGetValue(key, out var task)) {
-                    TileCacheOrder.Remove(key);
-                    TileCacheOrder.Add(key);
-                    return task;
-                }
-
-                var tile = new Tile(zoom, x, y);
-                task = tile.LoadGeometry();
-                TileCache.Add(key, task);
-                TileCacheOrder.Add(key);
-
-                while (TileCacheOrder.Count > MaximumCachedTiles) {
-                    TileCache.Remove(TileCacheOrder[0]);
-                    TileCacheOrder.RemoveAt(0);
-                }
-
-                Console.WriteLine($"Caching {tile} ({TileCacheOrder.Count} / {MaximumCachedTiles})");
-
-                return task;
-            }
-        }
-
-        public int Zoom { get; }
-        public int X { get; }
-        public int Y { get; }
-        public Point NW { get; }
-        public Point SE { get; }
-        public float ImageScale { get; }
         public ImmutableList<string> Layers { get; private set; }
         public ImmutableList<Way> Roads { get; private set; }
         public ImmutableList<Junction> RoadJunctions { get; private set; }
 
-        public Tile(int zoom, int x, int y)
+        RoadTile(int zoom, int x, int y)
+            : base(zoom, x, y)
         {
-            Zoom = zoom;
-            X = x;
-            Y = y;
-            NW = GetPointFromTile(zoom, x, y);
-            SE = GetPointFromTile(zoom, x + 1, y + 1);
-            ImageScale = (float)(1 / (C * Math.Cos(NW.Lat * Math.PI / 180) / Math.Pow(2, zoom + 8)));
         }
 
-        Tile(int zoom, int x, int y, Tile copy)
-            : this(zoom, x, y)
+        RoadTile(int zoom, int x, int y, RoadTile copy)
+            : base(zoom, x, y)
         {
             Debug.Assert(copy.Layers != null, "Cannot copy data from Tile without any data");
 
@@ -82,12 +31,11 @@ namespace TileService.Models.Geometry
             RoadJunctions = copy.RoadJunctions;
         }
 
-        async Task<Tile> LoadGeometry()
+        async public override Task<RoadTile> Load()
         {
-            Debug.Assert(Zoom == MaximumCachedZoomLevel, $"Trying to load geometry for incorrect zoom level {Zoom}");
             Debug.Assert(Roads == null, "Cannot load data for Tile more than once");
 
-            var overpass = await Overpass.Query.Get(this);
+            var overpass = await Overpass.Query.GetHighways(this);
             var overpassWays = overpass.elements.Where(element => element.type == "way").ToArray();
             var overpassNodes = overpass.elements.Where(element => element.type == "node").ToArray();
             var overpassNodesById = new Dictionary<long, Overpass.Element>(
@@ -152,28 +100,6 @@ namespace TileService.Models.Geometry
             }));
 
             return this;
-        }
-
-        public override string ToString()
-        {
-            return $"Tile({Zoom}, {X}, {Y})";
-        }
-
-        public PointF GetPointFromPoint(Point point)
-        {
-            return new PointF(
-                (float)(256 * (point.Lon - NW.Lon) / (SE.Lon - NW.Lon)),
-                (float)(256 * (point.Lat - NW.Lat) / (SE.Lat - NW.Lat))
-            );
-        }
-
-        static Point GetPointFromTile(int zoom, int x, int y)
-        {
-            var n = Math.Pow(2, zoom);
-            return new Point(
-                180 / Math.PI * Math.Atan(Math.Sinh(Math.PI - (2 * Math.PI * y / n))),
-                (x / n * 360) - 180
-            );
         }
     }
 }

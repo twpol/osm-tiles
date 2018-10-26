@@ -6,7 +6,7 @@ namespace TileService.Tests
 {
     public class Roads
     {
-        static readonly Tile Tile = new Tile(18, 0, 0);
+        static readonly RoadTile Tile = RoadTile.Cache.Get(18, 0, 0).Result;
         static readonly Point[] StraightWayPoints = {
             new Point(0, 0),
             new Point(0, 1),

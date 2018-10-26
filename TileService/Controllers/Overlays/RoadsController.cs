@@ -52,7 +52,7 @@ namespace TileService.Controllers.Overlays
             "Cycle|Cycle",
         };
 
-        static SizeF GetRoadOffset(Tile tile, Line line, Point point) {
+        static SizeF GetRoadOffset(RoadTile tile, Line line, Point point) {
             var lengthExtension = (float)Math.Cos(Angle.Difference(line.Angle, point.Angle).Radians);
             if (lengthExtension < 0.5) {
                 Console.WriteLine($"Warning: Unusual length extension for road offset (tile={tile}, line={line.Angle}, point={point.Angle}, extension={lengthExtension})");
@@ -83,7 +83,7 @@ namespace TileService.Controllers.Overlays
 
             var start = DateTimeOffset.UtcNow;
 
-            var tile = await Tile.Get(zoom, x, y);
+            var tile = await RoadTile.Cache.Get(zoom, x, y);
 
             var image = new Image<Rgba32>(256, 256);
             image.Mutate(context =>
@@ -198,7 +198,7 @@ namespace TileService.Controllers.Overlays
             );
         }
 
-        static void RenderRoads(Tile tile, string layer, Action<Way> render)
+        static void RenderRoads(RoadTile tile, string layer, Action<Way> render)
         {
             foreach (var way in tile.Roads) {
                 if (way.Tags.GetValueOrDefault("layer", "0") == layer) {
