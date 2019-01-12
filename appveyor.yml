@@ -5,4 +5,4 @@ build_script:
 test_script:
 - cmd: dotnet test TileService.Tests
 artifacts:
-- path: TileService\bin\Release\netcoreapp2.1\publish
+- path: TileService\bin\Release\netcoreapp2.2\publish

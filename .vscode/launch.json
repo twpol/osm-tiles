@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/TileService/bin/Debug/netcoreapp2.1/TileService.dll",
+            "program": "${workspaceFolder}/TileService/bin/Debug/netcoreapp2.2/TileService.dll",
             "args": [],
             "cwd": "${workspaceFolder}/TileService",
             "stopAtEntry": false,
