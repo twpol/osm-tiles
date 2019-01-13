@@ -88,6 +88,14 @@
             maxNativeZoom: 19,
         });
 
+        var overlayCompleteness = L.tileLayer('/overlays/completeness/{z}/{x}/{y}.png', {
+            attribution: 'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
+            minZoom: 10,
+            maxZoom: 22,
+            minNativeZoom: 10,
+            maxNativeZoom: 10,
+        });
+
         var overlayRoads = L.tileLayer('/overlays/roads/{z}/{x}/{y}.png', {
             attribution: 'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
             minZoom: 16,
@@ -100,6 +108,7 @@
             "Black and white": baseOSMBlackAndWhite,
             "No labels": baseOSMNoLabels,
         }, {
+            "Completeness": overlayCompleteness,
             "Roads": overlayRoads,
         }).addTo(map);
 
