@@ -27,6 +27,10 @@ namespace TileService.Controllers.Overlays
             10,
             5,
         });
+        static readonly Pen<Rgba32> LaneSameDirLine = new Pen<Rgba32>(new Rgba32(255, 255, 255), 1, new float[] {
+            5,
+            10,
+        });
         static readonly HashSet<string> LaneTransitionKerb = new HashSet<string>() {
             "Edge|Parking",
             "Edge|Cycle",
@@ -159,8 +163,11 @@ namespace TileService.Controllers.Overlays
                                         }
 
                                         if (LaneTransitionLine.Contains(transition)) {
+                                            var laneLine = road.Lanes[laneIndex - 1].Direction == road.Lanes[laneIndex].Direction
+                                                ? LaneSameDirLine
+                                                : LaneLine;
                                             context.DrawLines(
-                                                LaneLine,
+                                                laneLine,
                                                 Offset(point1, offsetDir1, offset),
                                                 Offset(point2, offsetDir2, offset)
                                             );
