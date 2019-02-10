@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp;
@@ -143,39 +144,43 @@ namespace TileService.Controllers.Overlays
                         RenderRoads(tile, layer, (way) => {
                             var road = way.Road;
                             if (road.Lanes.Count > 0) {
-                                RenderRoadSegments(way, (line) => {
-                                    var point1 = tile.GetPointFromPoint(line.Start);
-                                    var point2 = tile.GetPointFromPoint(line.End);
-                                    var offsetDir1 = GetRoadOffset(tile, line, line.Start);
-                                    var offsetDir2 = GetRoadOffset(tile, line, line.End);
+                                var points = way.Segments
+                                    .Select(segment => tile.GetPointFromPoint(segment.Start))
+                                    .Append(tile.GetPointFromPoint(way.Segments.Last().End))
+                                    .ToList();
 
-                                    var offset = -road.Center + road.Lanes[0].Width;
-                                    for (var laneIndex = 1; laneIndex < road.Lanes.Count; laneIndex++)
-                                    {
-                                        var transition = $"{road.Lanes[laneIndex - 1].Type}|{road.Lanes[laneIndex].Type}";
+                                var offsetDirs = way.Segments
+                                    .Select(segment => GetRoadOffset(tile, segment, segment.Start))
+                                    .Append(GetRoadOffset(tile, way.Segments.Last(), way.Segments.Last().End))
+                                    .ToList();
 
-                                        if (LaneTransitionKerb.Contains(transition)) {
-                                            context.DrawLines(
-                                                KerbLine,
-                                                Offset(point1, offsetDir1, offset),
-                                                Offset(point2, offsetDir2, offset)
-                                            );
-                                        }
+                                var offset = -road.Center + road.Lanes[0].Width;
+                                for (var laneIndex = 1; laneIndex < road.Lanes.Count; laneIndex++)
+                                {
+                                    var transition = $"{road.Lanes[laneIndex - 1].Type}|{road.Lanes[laneIndex].Type}";
+                                    var lanePoints = Enumerable.Range(0, way.Segments.Count + 1)
+                                        .Select(index => Offset(points[index], offsetDirs[index], offset))
+                                        .ToArray();
 
-                                        if (LaneTransitionLine.Contains(transition)) {
-                                            var laneLine = road.Lanes[laneIndex - 1].Direction == road.Lanes[laneIndex].Direction
-                                                ? LaneSameDirLine
-                                                : LaneLine;
-                                            context.DrawLines(
-                                                laneLine,
-                                                Offset(point1, offsetDir1, offset),
-                                                Offset(point2, offsetDir2, offset)
-                                            );
-                                        }
-
-                                        offset += road.Lanes[laneIndex].Width;
+                                    if (LaneTransitionKerb.Contains(transition)) {
+                                        context.DrawLines(
+                                            KerbLine,
+                                            lanePoints
+                                        );
                                     }
-                                });
+
+                                    if (LaneTransitionLine.Contains(transition)) {
+                                        var laneLine = road.Lanes[laneIndex - 1].Direction == road.Lanes[laneIndex].Direction
+                                            ? LaneSameDirLine
+                                            : LaneLine;
+                                        context.DrawLines(
+                                            laneLine,
+                                            lanePoints
+                                        );
+                                    }
+
+                                    offset += road.Lanes[laneIndex].Width;
+                                }
                             }
                         });
                     }
