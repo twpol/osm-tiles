@@ -122,7 +122,7 @@ namespace TileService.Models.Geometry
             if (parkingBothLanes > 0) {
                 lanes.Insert(0, new Lane(LaneType.Parking, parkingBothLanes));
                 lanes.Add(new Lane(LaneType.Parking, parkingBothLanes));
-                center += parkingLeftLanes;
+                center += parkingBothLanes;
             }
 
             var sidewalk = way.Tags.GetValueOrDefault("sidewalk", "no");
