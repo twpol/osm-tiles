@@ -112,6 +112,21 @@
             "description": "Roads: Displays this many drivable lanes on the road"
         },
         {
+            "key": "lanes:forward",
+            "object_types": ["way"],
+            "description": "Roads: Displays this many forward drivable lanes on the road"
+        },
+        {
+            "key": "lanes:backward",
+            "object_types": ["way"],
+            "description": "Roads: Displays this many backward drivable lanes on the road"
+        },
+        {
+            "key": "lanes:both_ways",
+            "object_types": ["way"],
+            "description": "Roads: Displays this many both-way drivable lanes on the road"
+        },
+        {
             "key": "oneway",
             "value": "yes",
             "object_types": ["way"],

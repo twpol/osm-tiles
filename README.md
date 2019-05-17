@@ -23,6 +23,9 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 - `cycleway:right:oneway=no`
 - `highway=motorway =trunk =primary =secondary =tertiary =unclassified =residential =service =motorway_link =trunk_link =primary_link =secondary_link =tertiary_link`
 - `lanes=*`
+- `lanes:forward=*`
+- `lanes:backward=*`
+- `lanes:both_ways=*`
 - `oneway=yes =-1`
 - `parking:lane:both=parallel =diagonal =perpendicular`
 - `parking:lane:left=parallel =diagonal =perpendicular`
@@ -35,7 +38,7 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 
 ### Current rendering
 
-![Example tile](Documentation/example-tile-road-overlay.png)
+![Example tile](Documentation/18-130908-87186.png)
 
 ## Notes
 

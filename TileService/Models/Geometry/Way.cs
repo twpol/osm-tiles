@@ -40,25 +40,21 @@ namespace TileService.Models.Geometry
             var lanes = new List<Lane>();
             var center = 0f;
 
-            var drivingLanes = GetNumberOfDrivingLanes(way);
-            if (drivingLanes == 0) {
+            var drivingLanes = GetDrivingLanes(way);
+            if (drivingLanes.Total == 0) {
                 return new Road(lanes, center);
             }
 
-            var oneway = way.Tags.GetValueOrDefault("oneway", "no");
-            for (var i = 1; i <= drivingLanes; i++) {
-                // TODO: Support for lanes:forward and lanes:backward
-                lanes.Add(new Lane(
-                    LaneType.Car,
-                    oneway == "yes" ? LaneDirection.Forward :
-                    oneway == "-1" ? LaneDirection.Backward :
-                    i * 2 < drivingLanes + 1 ? LaneDirection.Forward :
-                    i * 2 == drivingLanes + 1 ? LaneDirection.Both :
-                    LaneDirection.Backward,
-                    LaneWidthCar
-                ));
+            for (var i = 1; i <= drivingLanes.Forward; i++) {
+                lanes.Add(new Lane(LaneType.Car, LaneDirection.Forward, LaneWidthCar));
             }
-            center += LaneWidthCar * drivingLanes / 2;
+            for (var i = 1; i <= drivingLanes.Both; i++) {
+                lanes.Add(new Lane(LaneType.Car, LaneDirection.Both, LaneWidthCar));
+            }
+            for (var i = 1; i <= drivingLanes.Backward; i++) {
+                lanes.Add(new Lane(LaneType.Car, LaneDirection.Backward, LaneWidthCar));
+            }
+            center += LaneWidthCar * drivingLanes.Total / 2;
 
             // TODO: Support for driving on the right.
             var twoway = way.Tags.GetValueOrDefault("oneway", "no") == "no";
@@ -140,15 +136,93 @@ namespace TileService.Models.Geometry
             return new Road(lanes, center);
         }
 
-        static int GetNumberOfDrivingLanes(Way way)
+        struct DrivingLanes
+        {
+            public int Forward;
+            public int Both;
+            public int Backward;
+            public int Total { get => Forward + Both + Backward; }
+        }
+
+        static int? ParseInt(string s)
+        {
+            if (int.TryParse(s, out var i))
+                return i;
+            return null;
+        }
+
+        static DrivingLanes GetDrivingLanes(Way way)
         {
             var highway = way.Tags.GetValueOrDefault("highway", "");
             var oneway = way.Tags.GetValueOrDefault("oneway", "no");
-            var defaultLanes =
-                oneway == "yes" || oneway == "-1" ? "1" :
-                highway == "service" ? "1" :
-                "2";
-            return int.Parse(way.Tags.GetValueOrDefault("lanes", defaultLanes));
+            var lanes = way.Tags.GetValueOrDefault("lanes");
+            var lanesForward = way.Tags.GetValueOrDefault("lanes:forward");
+            var lanesBackward = way.Tags.GetValueOrDefault("lanes:backward");
+            var lanesBothWays = way.Tags.GetValueOrDefault("lanes:both_ways"); // NOTE: This is only a proposal!
+
+            // Based on https://wiki.openstreetmap.org/wiki/Key:lanes#Lanes_in_different_directions
+            var isOneway = oneway == "yes" || oneway == "-1";
+            var numTotal = ParseInt(lanes);
+            var numForward = ParseInt(lanesForward);
+            var numBackward = ParseInt(lanesBackward);
+            var numBoth = ParseInt(lanesBothWays);
+
+            if (numTotal.HasValue) {
+                if (numForward.HasValue && numBackward.HasValue && numBoth.HasValue) {
+                    // lanes= + lanes:forward= + lanes:backward= + lanes:both_ways=
+                } else if (numForward.HasValue && numBackward.HasValue && !numBoth.HasValue) {
+                    // lanes= + lanes:forward= + lanes:backward=
+                    numBoth = numTotal - numForward - numBackward;
+                } else if (numForward.HasValue && !numBackward.HasValue) {
+                    // lanes= + lanes:forward= [+ lanes:both_ways=]
+                    numBackward = numTotal - numForward - (numBoth ?? 0);
+                } else if (!numForward.HasValue && numBackward.HasValue) {
+                    // lanes= + lanes:backward= [+ lanes:both_ways=]
+                    numForward = numTotal - numBackward - (numBoth ?? 0);
+                } else if (!numForward.HasValue && !numBackward.HasValue && numBoth.HasValue) {
+                    // lanes= + lanes:both_ways=
+                    var remaining = numTotal - numBoth;
+                    numForward = isOneway ? remaining : remaining / 2;
+                    numBackward = isOneway ? 0 : remaining - numForward;
+                } else if (!numForward.HasValue && !numBackward.HasValue && !numBoth.HasValue) {
+                    // lanes=
+                    numForward = isOneway ? numTotal : numTotal / 2;
+                    numBackward = isOneway ? 0 : numTotal / 2;
+                    numBoth = isOneway ? 0 : numTotal % 2;
+                }
+                numBoth = numBoth ?? 0;
+            } else {
+                // Based on https://wiki.openstreetmap.org/wiki/Key:lanes#Assumptions
+                var defaultLanes =
+                    isOneway ? 1 :
+                    highway == "unclassified" || highway == "service" ? 1 :
+                    2;
+                numBoth = numBoth ?? 0;
+                if (numForward.HasValue && numBackward.HasValue) {
+                    // lanes:forward= + lanes:backward= [+ lanes:both_ways=]
+                } else if (numForward.HasValue && !numBackward.HasValue) {
+                    // lanes:forward= [+ lanes:both_ways=]
+                    numBackward = defaultLanes - numForward - numBoth;
+                } else if (!numForward.HasValue && numBackward.HasValue) {
+                    // lanes:backward= [+ lanes:both_ways=]
+                    numForward = defaultLanes - numBackward - numBoth;
+                } else if (!numForward.HasValue && !numBackward.HasValue) {
+                    // [lanes:both_ways=]
+                    numForward = 1;
+                    numBackward = defaultLanes == 2 ? 1 : 0;
+                }
+                numTotal = numForward + numBackward + numBoth;
+            }
+
+            if (numTotal != numForward + numBackward + numBoth || numTotal < 1 || numForward < 0 || numBackward < 0 || numBoth < 0 || (isOneway && numTotal != numForward)) {
+                Console.WriteLine($"Warning: Unusual combination of oneway/lanes (name={way.Tags.GetValueOrDefault("name")} oneway={oneway} lanes={lanes} lanes:forward={lanesForward} lanes:backward={lanesBackward} lanes:both_ways={lanesBothWays})");
+            }
+
+            return new DrivingLanes {
+                Forward = numForward.Value,
+                Both = numBoth.Value,
+                Backward = numBackward.Value,
+            };
         }
 
         static float GetWidthOfParkingLanes(Way way, string side)
