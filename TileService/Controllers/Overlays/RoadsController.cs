@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Drawing.Processing;
 using TileService.Models.Geometry;
-using PointF = SixLabors.Primitives.PointF;
-using SizeF = SixLabors.Primitives.SizeF;
+using Point = TileService.Models.Geometry.Point;
 
 namespace TileService.Controllers.Overlays
 {
@@ -20,15 +20,15 @@ namespace TileService.Controllers.Overlays
         const int ZoomMaximum = 22;
         const int LaneZoomMinimum = 18;
         static readonly Rgba32 SidewalkColor = new Rgba32(128, 128, 128);
-        static readonly Pen<Rgba32> KerbLine = new Pen<Rgba32>(new Rgba32(192, 192, 192), 1);
+        static readonly Pen KerbLine = new Pen(new Rgba32(192, 192, 192), 1);
         static readonly Rgba32 ParkingColor = new Rgba32(64, 64, 192);
         static readonly Rgba32 CycleLaneColor = new Rgba32(64, 192, 64);
         static readonly Rgba32 CarLaneColor = new Rgba32(0, 0, 0);
-        static readonly Pen<Rgba32> LaneLine = new Pen<Rgba32>(new Rgba32(255, 255, 255), 1, new float[] {
+        static readonly Pen LaneLine = new Pen(new Rgba32(255, 255, 255), 1, new float[] {
             10,
             5,
         });
-        static readonly Pen<Rgba32> LaneSameDirLine = new Pen<Rgba32>(new Rgba32(255, 255, 255), 1, new float[] {
+        static readonly Pen LaneSameDirLine = new Pen(new Rgba32(255, 255, 255), 1, new float[] {
             5,
             10,
         });
@@ -199,7 +199,7 @@ namespace TileService.Controllers.Overlays
             return File(stream, "image/png");
         }
 
-        static void RenderLane(IImageProcessingContext<Rgba32> context, Rgba32 color, PointF point1, PointF point2, SizeF offsetDir1, SizeF offsetDir2, float offset1, float offset2)
+        static void RenderLane(IImageProcessingContext context, Rgba32 color, PointF point1, PointF point2, SizeF offsetDir1, SizeF offsetDir2, float offset1, float offset2)
         {
             context.FillPolygon(
                 color,

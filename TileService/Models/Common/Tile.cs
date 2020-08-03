@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using SixLabors.Primitives;
-using TileService.Models.Geometry;
+using SixLabors.ImageSharp;
 using Point = TileService.Models.Geometry.Point;
 
 namespace TileService.Models.Common
