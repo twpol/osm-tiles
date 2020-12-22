@@ -1,0 +1,9 @@
+version: 1.0.{build}
+skip_branch_with_pr: true
+image: Visual Studio 2019
+build_script:
+- cmd: dotnet publish --configuration Release
+test_script:
+- cmd: dotnet test TileService.Tests
+artifacts:
+- path: TileService\bin\Release\net5.0\publish
