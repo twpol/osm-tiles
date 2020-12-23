@@ -27,6 +27,13 @@ namespace TileService.Models.Geometry
                 );
                 TerminatedWayPoints[0].Point.Angle = Angle.Add(angleRad, extraAngle1);
                 TerminatedWayPoints[1].Point.Angle = Angle.Add(angleRad, extraAngle2);
+            } else if (WayPoints.All(wp => wp.Way.Tags.GetValueOrDefault("oneway", "no") == "yes")) {
+                var angleRad = Angle.Average(
+                    WayPoints.Select(wp => wp.Point.Angle).ToArray()
+                );
+                foreach (var wp in WayPoints) {
+                    wp.Point.Angle = angleRad;
+                }
             }
         }
     }

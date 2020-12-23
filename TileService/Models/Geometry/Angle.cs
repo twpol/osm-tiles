@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace TileService.Models.Geometry
 {
@@ -37,6 +38,14 @@ namespace TileService.Models.Geometry
             return new Angle(Math.Atan2(
                 Math.Sin(angle1.Radians) + Math.Sin(angle2.Radians),
                 Math.Cos(angle1.Radians) + Math.Cos(angle2.Radians)
+            ));
+        }
+
+        public static Angle Average(params Angle[] angles)
+        {
+            return new Angle(Math.Atan2(
+                angles.Sum(angle => Math.Sin(angle.Radians)),
+                angles.Sum(angle => Math.Cos(angle.Radians))
             ));
         }
 
