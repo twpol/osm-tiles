@@ -94,6 +94,12 @@
             maxZoom: 22,
         }).addTo(map);
 
+        var overlayRails = L.tileLayer('/overlays/rails/{z}/{x}/{y}.png', {
+            attribution: 'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
+            minZoom: 16,
+            maxZoom: 22,
+        }).addTo(map);
+
         L.control.layers({
             "None": baseNone,
             "Standard": baseOSMStandard,
@@ -101,6 +107,7 @@
             "No labels": baseOSMNoLabels,
         }, {
             "Roads": overlayRoads,
+            "Rails": overlayRails,
         }).addTo(map);
 
     </script>
