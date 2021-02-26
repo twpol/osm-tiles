@@ -30,71 +30,95 @@
     <body>
         <div id="map"></div>
         <script>
-            var mapViewState = "";
+            let mapViewState = "";
 
             function setUrlFromMapView(map) {
-                var newMapViewState = [
-                    map.getZoom(),
-                    map.getCenter().lat.toFixed(6),
-                    map.getCenter().lng.toFixed(6),
-                ].join("/");
-                if (newMapViewState === mapViewState) {
-                    return;
-                }
-                history.pushState(
-                    null,
-                    document.title,
-                    "?map=" + newMapViewState
+                const state = new URLSearchParams();
+                state.set(
+                    "map",
+                    [
+                        map.getZoom(),
+                        map.getCenter().lat.toFixed(4),
+                        map.getCenter().lng.toFixed(4),
+                    ].join("/")
                 );
+                map.eachLayer((layer) => {
+                    state.append("layer", layer.options.id);
+                });
+                const newMapViewState = state.toString();
+
+                if (newMapViewState !== mapViewState) {
+                    history.pushState(
+                        null,
+                        document.title,
+                        "?" + newMapViewState.replace(/%2F/g, "/")
+                    );
+                }
             }
 
             function setMapViewFromUrl(map) {
-                try {
-                    var view = location.search
-                        .substr(1)
-                        .split("&")
-                        .filter(function (param) {
-                            return param.indexOf("map=") === 0;
-                        });
-                    mapViewState = view[0].substr(4);
-                } catch (error) {
-                    mapViewState = "18/51.505000/-0.090000";
+                const state = new URL(location).searchParams;
+                if (!state.get("map")) {
+                    state.set("map", "18/51.5050/-0.0900");
                 }
-                var viewParts = mapViewState.split("/");
+                if (state.getAll("layer").length === 0) {
+                    defaultLayers.forEach((layer) =>
+                        state.append("layer", layer.options.id)
+                    );
+                }
+                mapViewState = state.toString();
+
+                const viewParts = state.get("map").split("/");
                 map.setView([+viewParts[1], +viewParts[2]], +viewParts[0]);
+
+                const viewLayers = state
+                    .getAll("layer")
+                    .map((layerName) =>
+                        layers.find((layer) => layer.options.id === layerName)
+                    )
+                    .filter((layer) => !!layer);
+                for (const layer of layers) {
+                    if (viewLayers.includes(layer)) {
+                        layer.addTo(map);
+                    } else {
+                        layer.remove();
+                    }
+                }
             }
 
-            var map = L.map("map");
-            setMapViewFromUrl(map);
-            setUrlFromMapView(map);
+            const map = L.map("map");
 
-            window.addEventListener("popstate", function () {
-                setMapViewFromUrl(map);
-            });
-
-            map.on("moveend zoomend", function () {
-                setUrlFromMapView(map);
-            });
-
-            var baseNone = L.tileLayer("/blank-tile.png", {
+            const baseNone = L.tileLayer("/blank-tile.png", {
+                id: "blank",
                 attribution: "",
                 maxZoom: 22,
                 maxNativeZoom: 19,
-            }).addTo(map);
+            });
 
-            var baseOSMStandard = L.tileLayer(
+            // Brightness +10 and cropped square of https://pixabay.com/photos/rush-grass-texture-background-70824/
+            const baseGrass = L.tileLayer("/grass-tile.png", {
+                id: "grass",
+                attribution:
+                    '<a href="https://pixabay.com/photos/rush-grass-texture-background-70824/">Grass texture</a>',
+                maxZoom: 22,
+                maxNativeZoom: 19,
+            });
+
+            const baseOSMStandard = L.tileLayer(
                 "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                 {
+                    id: "standard",
                     attribution:
                         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
                     maxZoom: 22,
                     maxNativeZoom: 19,
                 }
-            ).addTo(map);
+            );
 
-            var baseOSMBlackAndWhite = L.tileLayer(
+            const baseOSMGreyscale = L.tileLayer(
                 "https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png",
                 {
+                    id: "greyscale",
                     attribution:
                         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
                     maxZoom: 22,
@@ -102,9 +126,10 @@
                 }
             );
 
-            var baseOSMNoLabels = L.tileLayer(
+            const baseOSMNoLabels = L.tileLayer(
                 "https://tiles.wmflabs.org/osm-no-labels/{z}/{x}/{y}.png",
                 {
+                    id: "no-labels",
                     attribution:
                         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
                     maxZoom: 22,
@@ -112,26 +137,47 @@
                 }
             );
 
-            var overlayRoads = L.tileLayer("/overlays/roads/{z}/{x}/{y}.png", {
-                attribution:
-                    'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
-                minZoom: 16,
-                maxZoom: 22,
-            }).addTo(map);
+            const overlayRoads = L.tileLayer(
+                "/overlays/roads/{z}/{x}/{y}.png",
+                {
+                    id: "roads",
+                    attribution:
+                        'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
+                    minZoom: 16,
+                    maxZoom: 22,
+                }
+            );
 
-            var overlayRails = L.tileLayer("/overlays/rails/{z}/{x}/{y}.png", {
-                attribution:
-                    'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
-                minZoom: 16,
-                maxZoom: 22,
-            }).addTo(map);
+            const overlayRails = L.tileLayer(
+                "/overlays/rails/{z}/{x}/{y}.png",
+                {
+                    id: "rails",
+                    attribution:
+                        'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
+                    minZoom: 16,
+                    maxZoom: 22,
+                }
+            );
+
+            const layers = [
+                baseNone,
+                baseGrass,
+                baseOSMStandard,
+                baseOSMGreyscale,
+                baseOSMNoLabels,
+                overlayRoads,
+                overlayRails,
+            ];
+
+            const defaultLayers = [baseOSMStandard, overlayRoads, overlayRails];
 
             L.control
                 .layers(
                     {
                         None: baseNone,
+                        Grass: baseGrass,
                         Standard: baseOSMStandard,
-                        "Black and white": baseOSMBlackAndWhite,
+                        Greyscale: baseOSMGreyscale,
                         "No labels": baseOSMNoLabels,
                     },
                     {
@@ -140,6 +186,16 @@
                     }
                 )
                 .addTo(map);
+
+            setMapViewFromUrl(map);
+            setUrlFromMapView(map);
+
+            window.addEventListener("popstate", () => setMapViewFromUrl(map));
+
+            map.on(
+                "moveend zoomend baselayerchange overlayadd overlayremove",
+                () => setTimeout(() => setUrlFromMapView(map), 0)
+            );
         </script>
     </body>
 </html>
