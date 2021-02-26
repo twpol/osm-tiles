@@ -1,116 +1,145 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>OpenStreetMap tile server example</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.3/dist/leaflet.css" integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
-        crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.3.3/dist/leaflet.js" integrity="sha512-tAGcCfR4Sc5ZP5ZoVz0quoZDYX5aCtEm/eu1KhSLj2c9eFrylXZknQYmxUssFaVJKvvc0dJQixhGjG2yXWiV9Q=="
-        crossorigin=""></script>
-    <style>
-        body {
-            margin: 0;
-        }
-
-        #map {
-            height: 100vh;
-        }
-
-    </style>
-</head>
-
-<body>
-    <div id="map"></div>
-    <script>
-        var mapViewState = '';
-
-        function setUrlFromMapView(map) {
-            var newMapViewState = [
-                map.getZoom(),
-                map.getCenter().lat.toFixed(6),
-                map.getCenter().lng.toFixed(6),
-            ].join('/');
-            if (newMapViewState === mapViewState) {
-                return;
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>OpenStreetMap tile server example</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.3.3/dist/leaflet.css"
+            integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+            crossorigin=""
+        />
+        <script
+            src="https://unpkg.com/leaflet@1.3.3/dist/leaflet.js"
+            integrity="sha512-tAGcCfR4Sc5ZP5ZoVz0quoZDYX5aCtEm/eu1KhSLj2c9eFrylXZknQYmxUssFaVJKvvc0dJQixhGjG2yXWiV9Q=="
+            crossorigin=""
+        ></script>
+        <style>
+            body {
+                margin: 0;
             }
-            history.pushState(null, document.title, '?map=' + newMapViewState);
-        }
 
-        function setMapViewFromUrl(map) {
-            try {
-                var view = location.search.substr(1).split('&').filter(function (param) {
-                    return param.indexOf('map=') === 0;
-                });
-                mapViewState = view[0].substr(4);
-            } catch(error) {
-                mapViewState = '18/51.505000/-0.090000';
+            #map {
+                height: 100vh;
             }
-            var viewParts = mapViewState.split('/');
-            map.setView([+viewParts[1], +viewParts[2]], +viewParts[0]);
-        }
+        </style>
+    </head>
 
-        var map = L.map('map');
-        setMapViewFromUrl(map);
-        setUrlFromMapView(map);
+    <body>
+        <div id="map"></div>
+        <script>
+            var mapViewState = "";
 
-        window.addEventListener('popstate', function () {
+            function setUrlFromMapView(map) {
+                var newMapViewState = [
+                    map.getZoom(),
+                    map.getCenter().lat.toFixed(6),
+                    map.getCenter().lng.toFixed(6),
+                ].join("/");
+                if (newMapViewState === mapViewState) {
+                    return;
+                }
+                history.pushState(
+                    null,
+                    document.title,
+                    "?map=" + newMapViewState
+                );
+            }
+
+            function setMapViewFromUrl(map) {
+                try {
+                    var view = location.search
+                        .substr(1)
+                        .split("&")
+                        .filter(function (param) {
+                            return param.indexOf("map=") === 0;
+                        });
+                    mapViewState = view[0].substr(4);
+                } catch (error) {
+                    mapViewState = "18/51.505000/-0.090000";
+                }
+                var viewParts = mapViewState.split("/");
+                map.setView([+viewParts[1], +viewParts[2]], +viewParts[0]);
+            }
+
+            var map = L.map("map");
             setMapViewFromUrl(map);
-        });
-
-        map.on('moveend zoomend', function () {
             setUrlFromMapView(map);
-        });
 
-        var baseNone = L.tileLayer('/blank-tile.png', {
-            attribution: '',
-            maxZoom: 22,
-            maxNativeZoom: 19,
-        }).addTo(map);
+            window.addEventListener("popstate", function () {
+                setMapViewFromUrl(map);
+            });
 
-        var baseOSMStandard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
-            maxZoom: 22,
-            maxNativeZoom: 19,
-        }).addTo(map);
+            map.on("moveend zoomend", function () {
+                setUrlFromMapView(map);
+            });
 
-        var baseOSMBlackAndWhite = L.tileLayer('https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
-            maxZoom: 22,
-            maxNativeZoom: 19,
-        });
+            var baseNone = L.tileLayer("/blank-tile.png", {
+                attribution: "",
+                maxZoom: 22,
+                maxNativeZoom: 19,
+            }).addTo(map);
 
-        var baseOSMNoLabels = L.tileLayer('https://tiles.wmflabs.org/osm-no-labels/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
-            maxZoom: 22,
-            maxNativeZoom: 19,
-        });
+            var baseOSMStandard = L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+                    attribution:
+                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
+                    maxZoom: 22,
+                    maxNativeZoom: 19,
+                }
+            ).addTo(map);
 
-        var overlayRoads = L.tileLayer('/overlays/roads/{z}/{x}/{y}.png', {
-            attribution: 'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
-            minZoom: 16,
-            maxZoom: 22,
-        }).addTo(map);
+            var baseOSMBlackAndWhite = L.tileLayer(
+                "https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png",
+                {
+                    attribution:
+                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
+                    maxZoom: 22,
+                    maxNativeZoom: 19,
+                }
+            );
 
-        var overlayRails = L.tileLayer('/overlays/rails/{z}/{x}/{y}.png', {
-            attribution: 'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
-            minZoom: 16,
-            maxZoom: 22,
-        }).addTo(map);
+            var baseOSMNoLabels = L.tileLayer(
+                "https://tiles.wmflabs.org/osm-no-labels/{z}/{x}/{y}.png",
+                {
+                    attribution:
+                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
+                    maxZoom: 22,
+                    maxNativeZoom: 19,
+                }
+            );
 
-        L.control.layers({
-            "None": baseNone,
-            "Standard": baseOSMStandard,
-            "Black and white": baseOSMBlackAndWhite,
-            "No labels": baseOSMNoLabels,
-        }, {
-            "Roads": overlayRoads,
-            "Rails": overlayRails,
-        }).addTo(map);
+            var overlayRoads = L.tileLayer("/overlays/roads/{z}/{x}/{y}.png", {
+                attribution:
+                    'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
+                minZoom: 16,
+                maxZoom: 22,
+            }).addTo(map);
 
-    </script>
-</body>
+            var overlayRails = L.tileLayer("/overlays/rails/{z}/{x}/{y}.png", {
+                attribution:
+                    'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
+                minZoom: 16,
+                maxZoom: 22,
+            }).addTo(map);
 
+            L.control
+                .layers(
+                    {
+                        None: baseNone,
+                        Standard: baseOSMStandard,
+                        "Black and white": baseOSMBlackAndWhite,
+                        "No labels": baseOSMNoLabels,
+                    },
+                    {
+                        Roads: overlayRoads,
+                        Rails: overlayRails,
+                    }
+                )
+                .addTo(map);
+        </script>
+    </body>
 </html>
