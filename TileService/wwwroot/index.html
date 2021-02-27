@@ -48,6 +48,7 @@
                 const newMapViewState = state.toString();
 
                 if (newMapViewState !== mapViewState) {
+                    mapViewState = newMapViewState;
                     history.pushState(
                         null,
                         document.title,
@@ -66,7 +67,6 @@
                         state.append("layer", layer.options.id)
                     );
                 }
-                mapViewState = state.toString();
 
                 const viewParts = state.get("map").split("/");
                 map.setView([+viewParts[1], +viewParts[2]], +viewParts[0]);
@@ -159,6 +159,31 @@
                 }
             );
 
+            const overlayAll = L.tileLayer("/overlays/all/{z}/{x}/{y}.png", {
+                id: "all",
+                attribution:
+                    'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
+                minZoom: 16,
+                maxZoom: 22,
+            });
+
+            overlayRoads.on("add", () => {
+                setTimeout(() => {
+                    overlayAll.remove();
+                }, 0);
+            });
+            overlayRails.on("add", () => {
+                setTimeout(() => {
+                    overlayAll.remove();
+                }, 0);
+            });
+            overlayAll.on("add", () => {
+                setTimeout(() => {
+                    overlayRoads.remove();
+                    overlayRails.remove();
+                }, 0);
+            });
+
             const layers = [
                 baseNone,
                 baseGrass,
@@ -167,9 +192,10 @@
                 baseOSMNoLabels,
                 overlayRoads,
                 overlayRails,
+                overlayAll,
             ];
 
-            const defaultLayers = [baseOSMStandard, overlayRoads, overlayRails];
+            const defaultLayers = [baseOSMStandard, overlayAll];
 
             L.control
                 .layers(
@@ -183,6 +209,7 @@
                     {
                         Roads: overlayRoads,
                         Rails: overlayRails,
+                        All: overlayAll,
                     }
                 )
                 .addTo(map);
@@ -194,7 +221,7 @@
 
             map.on(
                 "moveend zoomend baselayerchange overlayadd overlayremove",
-                () => setTimeout(() => setUrlFromMapView(map), 0)
+                () => setTimeout(() => setUrlFromMapView(map), 100)
             );
         </script>
     </body>
