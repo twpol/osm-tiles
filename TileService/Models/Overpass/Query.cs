@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -29,17 +30,31 @@ namespace TileService.Models.Overpass
 
         static async Task<Response> RunQuery(string overpassQuery)
         {
-            using (var overpassResponse = await Client.PostAsync(
-                OverpassAPIEndpoint,
-                new FormUrlEncodedContent(new Dictionary<string, string>() {
-                    { "data", overpassQuery },
-                })
-            )) {
-                overpassResponse.EnsureSuccessStatusCode();
-                using (var overpassReader = new StreamReader(await overpassResponse.Content.ReadAsStreamAsync()))
-                using (var overpassJson = new JsonTextReader(overpassReader)) {
-                    return new JsonSerializer().Deserialize<Response>(overpassJson);
+            try
+            {
+                using (var overpassResponse = await Client.PostAsync(
+                    OverpassAPIEndpoint,
+                    new FormUrlEncodedContent(new Dictionary<string, string>() {
+                        { "data", overpassQuery },
+                    })
+                ))
+                {
+                    overpassResponse.EnsureSuccessStatusCode();
+                    using (var overpassReader = new StreamReader(await overpassResponse.Content.ReadAsStreamAsync()))
+                    using (var overpassJson = new JsonTextReader(overpassReader))
+                    {
+                        return new JsonSerializer().Deserialize<Response>(overpassJson);
+                    }
                 }
+            }
+            catch (HttpRequestException error)
+            {
+                Console.WriteLine($"Warning: {error}");
+                // By returning an empty response, we stop repeated requests that keep hitting errors like 429 (Too Many Requests)
+                return new Response
+                {
+                    elements = new Element[0],
+                };
             }
         }
 
