@@ -21,7 +21,8 @@ namespace TileService.Controllers.Overlays
         const int ZoomMinimum = 16;
         const int ZoomMaximum = 22;
 
-        const int LaneZoomMinimum = 18;
+        const int LaneKerbZoomMinimum = 19;
+        const int LaneLineZoomMinimum = 18;
         static readonly Rgba32 SidewalkColor = new Rgba32(128, 128, 128);
         static readonly Pen KerbLine = new Pen(new Rgba32(192, 192, 192), 1);
         static readonly Rgba32 ParkingColor = new Rgba32(64, 64, 192);
@@ -213,7 +214,7 @@ namespace TileService.Controllers.Overlays
                                 });
                             }
                         });
-                        if (zoom >= LaneZoomMinimum)
+                        if (zoom >= LaneKerbZoomMinimum || zoom >= LaneLineZoomMinimum)
                         {
                             RenderRoads(roadTile, layer, (way) =>
                             {
@@ -238,7 +239,7 @@ namespace TileService.Controllers.Overlays
                                             .Select(index => Offset(points[index], offsetDirs[index], offset))
                                             .ToArray();
 
-                                        if (LaneTransitionKerb.Contains(transition))
+                                        if (LaneTransitionKerb.Contains(transition) && zoom >= LaneKerbZoomMinimum)
                                         {
                                             context.DrawLines(
                                                 KerbLine,
@@ -246,7 +247,7 @@ namespace TileService.Controllers.Overlays
                                             );
                                         }
 
-                                        if (LaneTransitionLine.Contains(transition))
+                                        if (LaneTransitionLine.Contains(transition) && zoom >= LaneLineZoomMinimum)
                                         {
                                             var laneLine = road.Lanes[laneIndex - 1].Direction == road.Lanes[laneIndex].Direction
                                                 ? LaneSameDirLine
