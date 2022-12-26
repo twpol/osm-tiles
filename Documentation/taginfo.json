@@ -1,6 +1,6 @@
 {
     "data_format": 1,
-    "data_url": "https://raw.githubusercontent.com/twpol/osm-tiles/master/Documentation/taginfo.json",
+    "data_url": "https://raw.githubusercontent.com/twpol/osm-tiles/main/Documentation/taginfo.json",
     "project": {
         "name": "OpenStreetMap detailed overlays",
         "description": "A tile renderer for OpenStreetMap which aims to visualise more tags than typical maps",
@@ -105,6 +105,13 @@
             "object_types": ["way"],
             "icon_url": "https://dummyimage.com/16x16.gif/000000&text=+",
             "description": "Roads: Defines the default behaviour of the road rendering, including whether it is shown"
+        },
+        {
+            "key": "highway",
+            "value": "motorway",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/000000&text=+",
+            "description": "Roads: Defaults the road to one-way"
         },
         {
             "key": "lanes",

@@ -154,7 +154,7 @@ namespace TileService.Models.Geometry
         static DrivingLanes GetDrivingLanes(Way way)
         {
             var highway = way.Tags.GetValueOrDefault("highway", "");
-            var oneway = way.Tags.GetValueOrDefault("oneway", "no");
+            var oneway = way.Tags.GetValueOrDefault("oneway", highway == "motorway" ? "yes" : "no");
             var lanes = way.Tags.GetValueOrDefault("lanes");
             var lanesForward = way.Tags.GetValueOrDefault("lanes:forward");
             var lanesBackward = way.Tags.GetValueOrDefault("lanes:backward");

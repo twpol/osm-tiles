@@ -128,6 +128,141 @@ namespace TileService.Tests
             );
         }
 
+        [Fact]
+        public void HighwayMotorway()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Edge, Center=1.5m)",
+                GetStraightRoadText("highway=motorway")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayLanes1()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Edge, Center=1.5m)",
+                GetStraightRoadText("highway=motorway", "lanes=1")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayLanes2()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=3.0m)",
+                GetStraightRoadText("highway=motorway", "lanes=2")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayLanes3()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)",
+                GetStraightRoadText("highway=motorway", "lanes=3")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayLanes4()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=6.0m)",
+                GetStraightRoadText("highway=motorway", "lanes=4")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayOnewayYes()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Edge, Center=1.5m)",
+                GetStraightRoadText("highway=motorway", "oneway=yes")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayOnewayLanes1()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Edge, Center=1.5m)",
+                GetStraightRoadText("highway=motorway", "oneway=yes", "lanes=1")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayOnewayLanes2()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=3.0m)",
+                GetStraightRoadText("highway=motorway", "oneway=yes", "lanes=2")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayOnewayLanes3()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)",
+                GetStraightRoadText("highway=motorway", "oneway=yes", "lanes=3")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayOnewayLanes4()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=6.0m)",
+                GetStraightRoadText("highway=motorway", "oneway=yes", "lanes=4")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayOnewayNo()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=3.0m)",
+                GetStraightRoadText("highway=motorway", "oneway=no")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayOnewayNoLanes1()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↕ 3.0m|Edge, Center=1.5m)",
+                GetStraightRoadText("highway=motorway", "oneway=no", "lanes=1")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayOnewayNoLanes2()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=3.0m)",
+                GetStraightRoadText("highway=motorway", "oneway=no", "lanes=2")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayOnewayNoLanes3()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Car ↕ 3.0m|Car ↓ 3.0m|Edge, Center=4.5m)",
+                GetStraightRoadText("highway=motorway", "oneway=no", "lanes=3")
+            );
+        }
+
+        [Fact]
+        public void HighwayMotorwayOnewayNoLanes4()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Car ↓ 3.0m|Edge, Center=6.0m)",
+                GetStraightRoadText("highway=motorway", "oneway=no", "lanes=4")
+            );
+        }
+
         // The following tests are based on the examples found at: https://wiki.openstreetmap.org/wiki/Bicycle
         // In all these tests, left/right have been flipped as wiki is using driving-on-right and we're driving-on-left.
 
