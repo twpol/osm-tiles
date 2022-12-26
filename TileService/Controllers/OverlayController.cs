@@ -26,6 +26,7 @@ namespace TileService.Controllers.Overlays
         static readonly Rgba32 SidewalkColor = new Rgba32(128, 128, 128);
         static readonly Pen KerbLine = new Pen(new Rgba32(192, 192, 192), 1);
         static readonly Rgba32 ParkingColor = new Rgba32(64, 64, 192);
+        static readonly Rgba32 ShoulderColor = new Rgba32(192, 192, 192);
         static readonly Rgba32 CycleLaneColor = new Rgba32(64, 192, 64);
         static readonly Rgba32 CarLaneColor = new Rgba32(0, 0, 0);
         static readonly Pen LaneLine = new Pen(new Rgba32(255, 255, 255), 1, new float[] {
@@ -200,6 +201,10 @@ namespace TileService.Controllers.Overlays
                                         if (lane.Type == LaneType.Parking)
                                         {
                                             RenderLane(context, ParkingColor, point1, point2, offsetDir1, offsetDir2, offset1, offset2);
+                                        }
+                                        else if (lane.Type == LaneType.Shoulder)
+                                        {
+                                            RenderLane(context, ShoulderColor, point1, point2, offsetDir1, offsetDir2, offset1, offset2);
                                         }
                                         else if (lane.Type == LaneType.Cycle)
                                         {

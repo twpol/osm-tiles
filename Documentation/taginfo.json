@@ -1,6 +1,6 @@
 {
     "data_format": 1,
-    "data_url": "https://raw.githubusercontent.com/twpol/osm-tiles/master/Documentation/taginfo.json",
+    "data_url": "https://raw.githubusercontent.com/twpol/osm-tiles/main/Documentation/taginfo.json",
     "project": {
         "name": "OpenStreetMap detailed overlays",
         "description": "A tile renderer for OpenStreetMap which aims to visualise more tags than typical maps",
@@ -107,6 +107,20 @@
             "description": "Roads: Defines the default behaviour of the road rendering, including whether it is shown"
         },
         {
+            "key": "highway",
+            "value": "motorway",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/000000&text=+",
+            "description": "Roads: Defaults the road to oneway=yes and shoulder=yes"
+        },
+        {
+            "key": "highway",
+            "value": "motorway_link",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/000000&text=+",
+            "description": "Roads: Defaults the road to oneway=yes and shoulder=yes"
+        },
+        {
             "key": "lanes",
             "object_types": ["way"],
             "description": "Roads: Displays this many drivable lanes on the road"
@@ -200,6 +214,55 @@
             "object_types": ["way"],
             "icon_url": "https://dummyimage.com/16x16.gif/4040C0&text=+",
             "description": "Roads: Displays a perpendicular parking lane on the right side of the road"
+        },
+        {
+            "key": "shoulder",
+            "value": "yes",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a shoulder lane on both sides of the road"
+        },
+        {
+            "key": "shoulder",
+            "value": "left",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a shoulder lane on the left side of the road"
+        },
+        {
+            "key": "shoulder",
+            "value": "right",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a shoulder lane on the right side of the road"
+        },
+        {
+            "key": "shoulder",
+            "value": "both",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a shoulder lane on both sides of the road"
+        },
+        {
+            "key": "shoulder:both",
+            "value": "yes",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a shoulder lane on both sides of the road"
+        },
+        {
+            "key": "shoulder:left",
+            "value": "yes",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a shoulder lane on the left side of the road"
+        },
+        {
+            "key": "shoulder:right",
+            "value": "yes",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a shoulder lane on the right side of the road"
         },
         {
             "key": "layer",

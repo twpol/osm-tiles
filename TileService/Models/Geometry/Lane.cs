@@ -41,6 +41,7 @@ namespace TileService.Models.Geometry
         Edge,
         Sidewalk,
         Parking,
+        Shoulder,
         Cycle,
         Car,
     }
