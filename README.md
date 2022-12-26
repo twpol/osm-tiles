@@ -30,6 +30,10 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 - `parking:lane:both=parallel =diagonal =perpendicular`
 - `parking:lane:left=parallel =diagonal =perpendicular`
 - `parking:lane:right=parallel =diagonal =perpendicular`
+- `shoulder=yes =left =right =both`
+- `shoulder:left=yes`
+- `shoulder:right=yes`
+- `shoulder:both=yes`
 - `layer=*`
 
 ### Limitations
