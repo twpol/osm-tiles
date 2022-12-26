@@ -18,14 +18,14 @@ namespace TileService.Models.Overpass
         {
             // Gather the bounding box with 20m extra around it for capturing edges.
             var bbox = GetBoundingBoxFromTile(tile, 20);
-            return await RunQuery($"[out:json][timeout:60];(way[\"highway\"]({bbox}););out body;>;out skel qt;");
+            return await RunQuery($"[out:json][timeout:60];(way[\"highway\"]({bbox}););node(w);way(bn)[\"highway\"];out body;node(w);out skel qt;");
         }
 
         public static async Task<Response> GetRailways(Tile tile)
         {
             // Gather the bounding box with 20m extra around it for capturing edges.
             var bbox = GetBoundingBoxFromTile(tile, 20);
-            return await RunQuery($"[out:json][timeout:60];(way[\"railway\"]({bbox}););out body;>;out skel qt;");
+            return await RunQuery($"[out:json][timeout:60];(way[\"railway\"]({bbox}););out body;node(w);out skel qt;");
         }
 
         static async Task<Response> RunQuery(string overpassQuery)
