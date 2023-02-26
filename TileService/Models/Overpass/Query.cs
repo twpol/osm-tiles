@@ -14,14 +14,14 @@ namespace TileService.Models.Overpass
 
         static readonly HttpClient Client = new HttpClient();
 
-        public static async Task<Response> GetHighways(Tile tile)
+        public static async Task<Response> GetRoad(Tile tile)
         {
             // Gather the bounding box with 20m extra around it for capturing edges.
             var bbox = GetBoundingBoxFromTile(tile, 20);
             return await RunQuery($"[out:json][timeout:60];(way[\"highway\"]({bbox}););node(w);way(bn)[\"highway\"];out body;node(w);out skel qt;");
         }
 
-        public static async Task<Response> GetRailways(Tile tile)
+        public static async Task<Response> GetRail(Tile tile)
         {
             // Gather the bounding box with 20m extra around it for capturing edges.
             var bbox = GetBoundingBoxFromTile(tile, 20);

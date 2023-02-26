@@ -33,7 +33,7 @@ namespace TileService.Models.Geometry
         {
             Debug.Assert(Rails == null, "Cannot load data for Tile more than once");
 
-            var overpass = await Overpass.Query.GetRailways(this);
+            var overpass = await Overpass.Query.GetRail(this);
             var overpassWays = overpass.elements.Where(element => element.type == "way").ToArray();
             var overpassNodes = overpass.elements.Where(element => element.type == "node").ToArray();
             var overpassNodesById = new Dictionary<long, Overpass.Element>(
