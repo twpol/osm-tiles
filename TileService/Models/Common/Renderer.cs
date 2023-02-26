@@ -17,21 +17,21 @@ namespace TileService.Models.Common
     {
         const int LaneKerbZoomMinimum = 19;
         const int LaneLineZoomMinimum = 18;
-        static readonly Rgba32 SidewalkColor = new Rgba32(128, 128, 128);
-        static readonly Pen KerbLine = new Pen(new Rgba32(192, 192, 192), 1);
-        static readonly Rgba32 ParkingColor = new Rgba32(64, 64, 192);
-        static readonly Rgba32 ShoulderColor = new Rgba32(192, 192, 192);
-        static readonly Rgba32 CycleLaneColor = new Rgba32(64, 192, 64);
-        static readonly Rgba32 CarLaneColor = new Rgba32(0, 0, 0);
-        static readonly Pen LaneLine = new Pen(new Rgba32(255, 255, 255), 1, new float[] {
+        static readonly Rgba32 SidewalkColor = new(128, 128, 128);
+        static readonly Pen KerbLine = new(new Rgba32(192, 192, 192), 1);
+        static readonly Rgba32 ParkingColor = new(64, 64, 192);
+        static readonly Rgba32 ShoulderColor = new(192, 192, 192);
+        static readonly Rgba32 CycleLaneColor = new(64, 192, 64);
+        static readonly Rgba32 CarLaneColor = new(0, 0, 0);
+        static readonly Pen LaneLine = new(new Rgba32(255, 255, 255), 1, new float[] {
             10,
             5,
         });
-        static readonly Pen LaneSameDirLine = new Pen(new Rgba32(255, 255, 255), 1, new float[] {
+        static readonly Pen LaneSameDirLine = new(new Rgba32(255, 255, 255), 1, new float[] {
             5,
             10,
         });
-        static readonly HashSet<string> LaneTransitionKerb = new HashSet<string>() {
+        static readonly HashSet<string> LaneTransitionKerb = new() {
             "Edge|Parking",
             "Edge|Cycle",
             "Edge|Car",
@@ -45,7 +45,7 @@ namespace TileService.Models.Common
             "Cycle|Edge",
             "Car|Edge",
         };
-        static readonly HashSet<string> LaneTransitionLine = new HashSet<string>() {
+        static readonly HashSet<string> LaneTransitionLine = new() {
             "Parking|Cycle",
             "Parking|Car",
             "Cycle|Car",
@@ -59,12 +59,10 @@ namespace TileService.Models.Common
         const int DefaultGaugeMM = 1435;
         const float SleeperWidth = 1.8f; // Sleeper size of 250mm x 130mm x 2600mm vs default gauge is 1.8118466899
         const float BallastWidth = 2.8f; // Center-to-center spacing of 4.0m vs default gauge is 2.7874564460
-        static readonly Pen RailLine = new Pen(new Rgba32(192, 192, 192), 1);
-        static readonly Pen DisusedRailLine = new Pen(new Rgba32(64, 64, 64), 1);
-        static readonly Rgba32 SleeperColour = new Rgba32(133, 133, 130); // https://en.wikipedia.org/wiki/List_of_colors - battleship grey
-        static readonly Rgba32 BallastColour = new Rgba32(102, 66, 33); // https://en.wikipedia.org/wiki/List_of_colors - dark brown
-
-        static readonly ImmutableList<string> EmptyStringList = new string[0].ToImmutableList();
+        static readonly Pen RailLine = new(new Rgba32(192, 192, 192), 1);
+        static readonly Pen DisusedRailLine = new(new Rgba32(64, 64, 64), 1);
+        static readonly Rgba32 SleeperColour = new(133, 133, 130); // https://en.wikipedia.org/wiki/List_of_colors - battleship grey
+        static readonly Rgba32 BallastColour = new(102, 66, 33); // https://en.wikipedia.org/wiki/List_of_colors - dark brown
 
         static SizeF GetOffset(Tile tile, Line line, Point point)
         {
@@ -96,46 +94,44 @@ namespace TileService.Models.Common
         {
             var start = DateTimeOffset.UtcNow;
 
-            var roads = type == "all" || type == "roads";
             var rails = type == "all" || type == "rails";
+            var roads = type == "all" || type == "roads";
 
-            // TODO: Consolidate tile cache?
-            var roadTile = roads ? await RoadTile.Cache.Get(zoom, x, y) : null;
-            var railTile = rails ? await RailTile.Cache.Get(zoom, x, y) : null;
+            var tile = await Tile.Cache.Get(zoom, x, y);
 
-            var stream = Render(roadTile, railTile, zoom);
+            var stream = Render(tile, rails: rails, roads: roads);
 
             var end = DateTimeOffset.UtcNow;
-            Console.WriteLine($"Rendered {type} on {(roadTile as Tile) ?? railTile} in {(end - start).TotalMilliseconds:F0} ms");
+            Console.WriteLine($"Rendered {type} on {tile} in {(end - start).TotalMilliseconds:F0} ms");
 
             return stream;
         }
 
-        public static MemoryStream Render(RoadTile roadTile, RailTile railTile, int zoom)
+        public static MemoryStream Render(Tile tile, bool rails, bool roads)
         {
-            var layers = (roadTile?.Layers ?? EmptyStringList).Concat(railTile?.Layers ?? EmptyStringList).Distinct().ToImmutableList().Sort((a, b) => int.Parse(a) - int.Parse(b));
+            var layers = tile.Layers.ToImmutableList().Sort((a, b) => int.Parse(a) - int.Parse(b));
 
             var image = new Image<Rgba32>(256, 256);
             image.Mutate(context =>
             {
                 foreach (var layer in layers)
                 {
-                    if (railTile != null)
+                    if (rails)
                     {
-                        RenderRails(railTile, layer, (way) =>
+                        RenderRails(tile, layer, (way) =>
                         {
                             if (!float.TryParse(way.Tags.GetValueOrDefault("gauge", "unknown"), out var gauge)) gauge = DefaultGaugeMM;
                             var width = gauge / 1000 * BallastWidth;
                             RenderRailSegments(way, (line) =>
                             {
-                                var point1 = railTile.GetPointFromPoint(line.Start);
-                                var point2 = railTile.GetPointFromPoint(line.End);
-                                var offsetDir1 = GetOffset(railTile, line, line.Start);
-                                var offsetDir2 = GetOffset(railTile, line, line.End);
+                                var point1 = tile.GetPointFromPoint(line.Start);
+                                var point2 = tile.GetPointFromPoint(line.End);
+                                var offsetDir1 = GetOffset(tile, line, line.Start);
+                                var offsetDir2 = GetOffset(tile, line, line.End);
                                 RenderLane(context, BallastColour, point1, point2, offsetDir1, offsetDir2, -width / 2, width / 2);
                             });
                         });
-                        RenderRails(railTile, layer, (way) =>
+                        RenderRails(tile, layer, (way) =>
                         {
                             var railway = way.Tags.GetValueOrDefault("railway", "no");
                             if (railway != "abandoned")
@@ -144,28 +140,28 @@ namespace TileService.Models.Common
                                 var width = gauge / 1000 * SleeperWidth;
                                 RenderRailSegments(way, (line) =>
                                 {
-                                    var point1 = railTile.GetPointFromPoint(line.Start);
-                                    var point2 = railTile.GetPointFromPoint(line.End);
-                                    var offsetDir1 = GetOffset(railTile, line, line.Start);
-                                    var offsetDir2 = GetOffset(railTile, line, line.End);
+                                    var point1 = tile.GetPointFromPoint(line.Start);
+                                    var point2 = tile.GetPointFromPoint(line.End);
+                                    var offsetDir1 = GetOffset(tile, line, line.Start);
+                                    var offsetDir2 = GetOffset(tile, line, line.End);
                                     RenderLane(context, SleeperColour, point1, point2, offsetDir1, offsetDir2, -width / 2, width / 2);
                                 });
                             }
                         });
                     }
-                    if (roadTile != null)
+                    if (roads)
                     {
-                        RenderRoads(roadTile, layer, (way) =>
+                        RenderRoads(tile, layer, (way) =>
                         {
                             var road = way.Road;
                             if (road.Lanes.Count > 0)
                             {
                                 RenderRoadSegments(way, (line) =>
                                 {
-                                    var point1 = roadTile.GetPointFromPoint(line.Start);
-                                    var point2 = roadTile.GetPointFromPoint(line.End);
-                                    var offsetDir1 = GetOffset(roadTile, line, line.Start);
-                                    var offsetDir2 = GetOffset(roadTile, line, line.End);
+                                    var point1 = tile.GetPointFromPoint(line.Start);
+                                    var point2 = tile.GetPointFromPoint(line.End);
+                                    var offsetDir1 = GetOffset(tile, line, line.Start);
+                                    var offsetDir2 = GetOffset(tile, line, line.End);
 
                                     var offset1 = -road.Center;
                                     foreach (var lane in road.Lanes)
@@ -180,17 +176,17 @@ namespace TileService.Models.Common
                                 });
                             }
                         });
-                        RenderRoads(roadTile, layer, (way) =>
+                        RenderRoads(tile, layer, (way) =>
                         {
                             var road = way.Road;
                             if (road.Lanes.Count > 0)
                             {
                                 RenderRoadSegments(way, (line) =>
                                 {
-                                    var point1 = roadTile.GetPointFromPoint(line.Start);
-                                    var point2 = roadTile.GetPointFromPoint(line.End);
-                                    var offsetDir1 = GetOffset(roadTile, line, line.Start);
-                                    var offsetDir2 = GetOffset(roadTile, line, line.End);
+                                    var point1 = tile.GetPointFromPoint(line.Start);
+                                    var point2 = tile.GetPointFromPoint(line.End);
+                                    var offsetDir1 = GetOffset(tile, line, line.Start);
+                                    var offsetDir2 = GetOffset(tile, line, line.End);
 
                                     var offset1 = -road.Center;
                                     foreach (var lane in road.Lanes)
@@ -217,21 +213,21 @@ namespace TileService.Models.Common
                                 });
                             }
                         });
-                        if (zoom >= LaneKerbZoomMinimum || zoom >= LaneLineZoomMinimum)
+                        if (tile.Zoom >= LaneKerbZoomMinimum || tile.Zoom >= LaneLineZoomMinimum)
                         {
-                            RenderRoads(roadTile, layer, (way) =>
+                            RenderRoads(tile, layer, (way) =>
                             {
                                 var road = way.Road;
                                 if (road.Lanes.Count > 0)
                                 {
                                     var points = way.Segments
-                                        .Select(segment => roadTile.GetPointFromPoint(segment.Start))
-                                        .Append(roadTile.GetPointFromPoint(way.Segments.Last().End))
+                                        .Select(segment => tile.GetPointFromPoint(segment.Start))
+                                        .Append(tile.GetPointFromPoint(way.Segments.Last().End))
                                         .ToList();
 
                                     var offsetDirs = way.Segments
-                                        .Select(segment => GetOffset(roadTile, segment, segment.Start))
-                                        .Append(GetOffset(roadTile, way.Segments.Last(), way.Segments.Last().End))
+                                        .Select(segment => GetOffset(tile, segment, segment.Start))
+                                        .Append(GetOffset(tile, way.Segments.Last(), way.Segments.Last().End))
                                         .ToList();
 
                                     var offset = -road.Center + road.Lanes[0].Width;
@@ -242,7 +238,7 @@ namespace TileService.Models.Common
                                             .Select(index => Offset(points[index], offsetDirs[index], offset))
                                             .ToArray();
 
-                                        if (LaneTransitionKerb.Contains(transition) && zoom >= LaneKerbZoomMinimum)
+                                        if (LaneTransitionKerb.Contains(transition) && tile.Zoom >= LaneKerbZoomMinimum)
                                         {
                                             context.DrawLines(
                                                 KerbLine,
@@ -250,7 +246,7 @@ namespace TileService.Models.Common
                                             );
                                         }
 
-                                        if (LaneTransitionLine.Contains(transition) && zoom >= LaneLineZoomMinimum)
+                                        if (LaneTransitionLine.Contains(transition) && tile.Zoom >= LaneLineZoomMinimum)
                                         {
                                             var laneLine = road.Lanes[laneIndex - 1].Direction == road.Lanes[laneIndex].Direction
                                                 ? LaneSameDirLine
@@ -267,9 +263,9 @@ namespace TileService.Models.Common
                             });
                         }
                     }
-                    if (railTile != null)
+                    if (rails)
                     {
-                        RenderRails(railTile, layer, (way) =>
+                        RenderRails(tile, layer, (way) =>
                         {
                             var railway = way.Tags.GetValueOrDefault("railway", "no");
                             if (railway != "abandoned" && railway != "construction")
@@ -278,13 +274,13 @@ namespace TileService.Models.Common
                                 var width = gauge / 1000;
 
                                 var points = way.Segments
-                                    .Select(segment => railTile.GetPointFromPoint(segment.Start))
-                                    .Append(railTile.GetPointFromPoint(way.Segments.Last().End))
+                                    .Select(segment => tile.GetPointFromPoint(segment.Start))
+                                    .Append(tile.GetPointFromPoint(way.Segments.Last().End))
                                     .ToList();
 
                                 var offsetDirs = way.Segments
-                                    .Select(segment => GetOffset(railTile, segment, segment.Start))
-                                    .Append(GetOffset(railTile, way.Segments.Last(), way.Segments.Last().End))
+                                    .Select(segment => GetOffset(tile, segment, segment.Start))
+                                    .Append(GetOffset(tile, way.Segments.Last(), way.Segments.Last().End))
                                     .ToList();
 
                                 var railPoints1 = Enumerable.Range(0, way.Segments.Count + 1)
@@ -323,7 +319,7 @@ namespace TileService.Models.Common
             );
         }
 
-        static void RenderRoads(RoadTile tile, string layer, Action<Way> render)
+        static void RenderRoads(Tile tile, string layer, Action<Way> render)
         {
             foreach (var way in tile.Roads)
             {
@@ -342,7 +338,7 @@ namespace TileService.Models.Common
             }
         }
 
-        static void RenderRails(RailTile tile, string layer, Action<Way> render)
+        static void RenderRails(Tile tile, string layer, Action<Way> render)
         {
             foreach (var way in tile.Rails)
             {

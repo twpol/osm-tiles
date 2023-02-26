@@ -12,40 +12,43 @@ namespace TileService.Models.Overpass
     {
         const string OverpassAPIEndpoint = "https://overpass-api.de/api/interpreter";
 
-        static readonly HttpClient Client = new HttpClient();
+        static readonly HttpClient Client = new();
 
-        public static async Task<Response> GetRoad(Tile tile)
+        public static async Task<Response> GetTile(Tile tile)
         {
             // Gather the bounding box with 20m extra around it for capturing edges.
             var bbox = GetBoundingBoxFromTile(tile, 20);
-            return await RunQuery($"[out:json][timeout:60];(way[\"highway\"]({bbox}););node(w);way(bn)[\"highway\"];out body;node(w);out skel qt;");
-        }
-
-        public static async Task<Response> GetRail(Tile tile)
-        {
-            // Gather the bounding box with 20m extra around it for capturing edges.
-            var bbox = GetBoundingBoxFromTile(tile, 20);
-            return await RunQuery($"[out:json][timeout:60];(way[\"railway\"]({bbox}););out body;node(w);out skel qt;");
+            return await RunQuery($@"
+                [out:json][timeout:60];
+                (
+                    way[""highway""]({bbox});
+                    way[""railway""]({bbox});
+                );
+                node(w)->.nodes;
+                (
+                    way(bn.nodes)[""highway""];
+                    way(bn.nodes)[""railway""];
+                );
+                out body;
+                node(w);
+                out skel qt;
+            ");
         }
 
         static async Task<Response> RunQuery(string overpassQuery)
         {
             try
             {
-                using (var overpassResponse = await Client.PostAsync(
+                using var overpassResponse = await Client.PostAsync(
                     OverpassAPIEndpoint,
                     new FormUrlEncodedContent(new Dictionary<string, string>() {
                         { "data", overpassQuery },
                     })
-                ))
-                {
-                    overpassResponse.EnsureSuccessStatusCode();
-                    using (var overpassReader = new StreamReader(await overpassResponse.Content.ReadAsStreamAsync()))
-                    using (var overpassJson = new JsonTextReader(overpassReader))
-                    {
-                        return new JsonSerializer().Deserialize<Response>(overpassJson);
-                    }
-                }
+                );
+                overpassResponse.EnsureSuccessStatusCode();
+                using var overpassReader = new StreamReader(await overpassResponse.Content.ReadAsStreamAsync());
+                using var overpassJson = new JsonTextReader(overpassReader);
+                return new JsonSerializer().Deserialize<Response>(overpassJson);
             }
             catch (HttpRequestException error)
             {
@@ -53,7 +56,7 @@ namespace TileService.Models.Overpass
                 // By returning an empty response, we stop repeated requests that keep hitting errors like 429 (Too Many Requests)
                 return new Response
                 {
-                    elements = new Element[0],
+                    elements = Array.Empty<Element>(),
                 };
             }
         }

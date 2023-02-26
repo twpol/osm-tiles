@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TileService.Models.Common;
 using TileService.Models.Geometry;
 using Xunit;
 
@@ -7,33 +8,34 @@ namespace TileService.Tests
     public class Roads
     {
         // TODO: Fix bug in tile Overpass query that exceeds 180 range on bounding box so we can use (18, 0, 0) here.
-        static readonly RoadTile Tile = RoadTile.Cache.Get(18, 1 << 4, 1 << 4).Result;
+        static readonly Tile Tile = Tile.Cache.Get(18, 1 << 4, 1 << 4).Result;
         static readonly Point[] StraightWayPoints = {
             new Point(0, 0),
             new Point(0, 1),
         };
 
-        IDictionary<string, string> GetTagsFromList(IList<string> list)
+        static IDictionary<string, string> GetTagsFromList(IList<string> list)
         {
             var dict = new Dictionary<string, string>(list.Count);
-            for (var index = 0; index < list.Count; index++) {
+            for (var index = 0; index < list.Count; index++)
+            {
                 var split = list[index].Split('=', 2);
                 dict.Add(split[0], split[1]);
             }
             return dict;
         }
 
-        Way GetStraightWay(IDictionary<string, string> tags)
+        static Way GetStraightWay(IDictionary<string, string> tags)
         {
             return new Way(Tile, tags, StraightWayPoints);
         }
 
-        Road GetStraightRoad(IDictionary<string, string> tags)
+        static Road GetStraightRoad(IDictionary<string, string> tags)
         {
             return GetStraightWay(tags).Road;
         }
 
-        string GetStraightRoadText(params string[] tags)
+        static string GetStraightRoadText(params string[] tags)
         {
             return GetStraightRoad(GetTagsFromList(tags)).ToString();
         }
@@ -417,7 +419,7 @@ namespace TileService.Tests
         public void WikiBicycleExampleM2c()
         {
             const string road = "Road(Edge|Car ↑ 3.0m|Cycle ↑ 1.0m|Car ↑ 3.0m|Edge, Center=3.5m)";
-            // Ambigious with a cycleway on the left/right side of the road: Assert.Equal(road, GetStraightRoadText("highway=road", "oneway=yes", "lanes=2", "cycleway=lane"));
+            // Ambigous with a cycleway on the left/right side of the road: Assert.Equal(road, GetStraightRoadText("highway=road", "oneway=yes", "lanes=2", "cycleway=lane"));
         }
 
         [Fact]
