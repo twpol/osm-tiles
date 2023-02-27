@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
@@ -90,31 +89,12 @@ namespace TileService.Models.Common
             };
         }
 
-        public static async Task<MemoryStream> Render(string type, int zoom, int x, int y)
-        {
-            var start = DateTimeOffset.UtcNow;
-
-            var rails = type == "all" || type == "rails";
-            var roads = type == "all" || type == "roads";
-
-            var tile = await Tile.Cache.Get(zoom, x, y);
-
-            var stream = Render(tile, rails: rails, roads: roads);
-
-            var end = DateTimeOffset.UtcNow;
-            Console.WriteLine($"Rendered {type} on {tile} in {(end - start).TotalMilliseconds:F0} ms");
-
-            return stream;
-        }
-
         public static MemoryStream Render(Tile tile, bool rails, bool roads)
         {
-            var layers = tile.Layers.ToImmutableList().Sort((a, b) => int.Parse(a) - int.Parse(b));
-
             var image = new Image<Rgba32>(256, 256);
             image.Mutate(context =>
             {
-                foreach (var layer in layers)
+                foreach (var layer in tile.Layers)
                 {
                     if (rails)
                     {

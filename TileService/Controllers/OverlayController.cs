@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TileService.Models.Common;
@@ -19,7 +20,14 @@ namespace TileService.Controllers.Overlays
                 return BadRequest();
             }
 
-            var stream = await Renderer.Render(type, zoom, x, y);
+            var tile = await Tile.Cache.Get(zoom, x, y);
+
+            var start = DateTimeOffset.UtcNow;
+            var rails = type == "all" || type == "rails";
+            var roads = type == "all" || type == "roads";
+            var stream = Renderer.Render(tile, rails: rails, roads: roads);
+            var end = DateTimeOffset.UtcNow;
+            Console.WriteLine($"Rendered {type} on {tile} in {(end - start).TotalMilliseconds:F0} ms");
 
             HttpContext.Response.Headers.Add("Cache-Control", new[] { "public", "max-age=43200" });
 
