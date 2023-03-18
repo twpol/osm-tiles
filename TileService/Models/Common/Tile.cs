@@ -28,7 +28,7 @@ namespace TileService.Models.Common
         public ImmutableList<Way> Roads { get; private set; }
         public ImmutableList<Junction> RoadJunctions { get; private set; }
 
-        Tile(int zoom, int x, int y)
+        public Tile(int zoom, int x, int y)
         {
             Zoom = zoom;
             X = x;
@@ -57,8 +57,8 @@ namespace TileService.Models.Common
         public PointF GetPointFromPoint(Point point)
         {
             return new PointF(
-                (float)(256 * (point.Lon - NW.Lon) / (SE.Lon - NW.Lon)),
-                (float)(256 * (point.Lat - NW.Lat) / (SE.Lat - NW.Lat))
+                (float)((point.Lon - NW.Lon) / (SE.Lon - NW.Lon)),
+                (float)((point.Lat - NW.Lat) / (SE.Lat - NW.Lat))
             );
         }
 
@@ -71,13 +71,19 @@ namespace TileService.Models.Common
             );
         }
 
-        async public Task<Tile> Load()
+        public async Task<Tile> Load()
         {
             Debug.Assert(Layers == null, "Cannot load data for Tile more than once");
 
             var overpass = await Overpass.Query.GetTile(this);
             var overpassWays = overpass.elements.Where(element => element.type == "way" && element.tags != null).ToArray();
             var overpassNodes = overpass.elements.Where(element => element.type == "node").ToArray();
+
+            return Load(overpassWays, overpassNodes);
+        }
+
+        public Tile Load(Overpass.Element[] overpassWays, Overpass.Element[] overpassNodes)
+        {
             var overpassNodesById = new Dictionary<long, Overpass.Element>(
                 overpassNodes.Select(node =>
                 {
@@ -118,10 +124,6 @@ namespace TileService.Models.Common
                     _ => false,
                 };
             }).ToList();
-            var overpassRailJunctions = overpassNodes.Where(node =>
-            {
-                return 1 < overpassRails.Where(road => road.nodes.Contains(node.id)).Count();
-            });
             Rails = ImmutableList.ToImmutableList(overpassRails.Select(way =>
             {
                 return new Way(

@@ -89,9 +89,9 @@ namespace TileService.Models.Common
             };
         }
 
-        public static MemoryStream Render(Tile tile, bool rails, bool roads)
+        public static MemoryStream Render(Tile tile, int size, bool rails, bool roads)
         {
-            var image = new Image<Rgba32>(256, 256);
+            var image = new Image<Rgba32>(size, size);
             image.Mutate(context =>
             {
                 foreach (var layer in tile.Layers)
@@ -104,8 +104,8 @@ namespace TileService.Models.Common
                             var width = gauge / 1000 * BallastWidth;
                             RenderRailSegments(way, (line) =>
                             {
-                                var point1 = tile.GetPointFromPoint(line.Start);
-                                var point2 = tile.GetPointFromPoint(line.End);
+                                var point1 = tile.GetPointFromPoint(line.Start) * size;
+                                var point2 = tile.GetPointFromPoint(line.End) * size;
                                 var offsetDir1 = GetOffset(tile, line, line.Start);
                                 var offsetDir2 = GetOffset(tile, line, line.End);
                                 RenderLane(context, BallastColour, point1, point2, offsetDir1, offsetDir2, -width / 2, width / 2);
@@ -120,8 +120,8 @@ namespace TileService.Models.Common
                                 var width = gauge / 1000 * SleeperWidth;
                                 RenderRailSegments(way, (line) =>
                                 {
-                                    var point1 = tile.GetPointFromPoint(line.Start);
-                                    var point2 = tile.GetPointFromPoint(line.End);
+                                    var point1 = tile.GetPointFromPoint(line.Start) * size;
+                                    var point2 = tile.GetPointFromPoint(line.End) * size;
                                     var offsetDir1 = GetOffset(tile, line, line.Start);
                                     var offsetDir2 = GetOffset(tile, line, line.End);
                                     RenderLane(context, SleeperColour, point1, point2, offsetDir1, offsetDir2, -width / 2, width / 2);
@@ -138,8 +138,8 @@ namespace TileService.Models.Common
                             {
                                 RenderRoadSegments(way, (line) =>
                                 {
-                                    var point1 = tile.GetPointFromPoint(line.Start);
-                                    var point2 = tile.GetPointFromPoint(line.End);
+                                    var point1 = tile.GetPointFromPoint(line.Start) * size;
+                                    var point2 = tile.GetPointFromPoint(line.End) * size;
                                     var offsetDir1 = GetOffset(tile, line, line.Start);
                                     var offsetDir2 = GetOffset(tile, line, line.End);
 
@@ -163,8 +163,8 @@ namespace TileService.Models.Common
                             {
                                 RenderRoadSegments(way, (line) =>
                                 {
-                                    var point1 = tile.GetPointFromPoint(line.Start);
-                                    var point2 = tile.GetPointFromPoint(line.End);
+                                    var point1 = tile.GetPointFromPoint(line.Start) * size;
+                                    var point2 = tile.GetPointFromPoint(line.End) * size;
                                     var offsetDir1 = GetOffset(tile, line, line.Start);
                                     var offsetDir2 = GetOffset(tile, line, line.End);
 
@@ -201,8 +201,8 @@ namespace TileService.Models.Common
                                 if (road.Lanes.Count > 0)
                                 {
                                     var points = way.Segments
-                                        .Select(segment => tile.GetPointFromPoint(segment.Start))
-                                        .Append(tile.GetPointFromPoint(way.Segments.Last().End))
+                                        .Select(segment => tile.GetPointFromPoint(segment.Start) * size)
+                                        .Append(tile.GetPointFromPoint(way.Segments.Last().End) * size)
                                         .ToList();
 
                                     var offsetDirs = way.Segments
@@ -254,8 +254,8 @@ namespace TileService.Models.Common
                                 var width = gauge / 1000;
 
                                 var points = way.Segments
-                                    .Select(segment => tile.GetPointFromPoint(segment.Start))
-                                    .Append(tile.GetPointFromPoint(way.Segments.Last().End))
+                                    .Select(segment => tile.GetPointFromPoint(segment.Start) * size)
+                                    .Append(tile.GetPointFromPoint(way.Segments.Last().End) * size)
                                     .ToList();
 
                                 var offsetDirs = way.Segments

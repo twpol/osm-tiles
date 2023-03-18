@@ -25,7 +25,7 @@ namespace TileService.Controllers.Overlays
             var start = DateTimeOffset.UtcNow;
             var rails = type == "all" || type == "rails";
             var roads = type == "all" || type == "roads";
-            var stream = Renderer.Render(tile, rails: rails, roads: roads);
+            var stream = Renderer.Render(tile, 256, rails: rails, roads: roads);
             var end = DateTimeOffset.UtcNow;
             Console.WriteLine($"Rendered {type} on {tile} in {(end - start).TotalMilliseconds:F0} ms");
 

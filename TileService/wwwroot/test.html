@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>OpenStreetMap tile server example</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            body {
+                margin: 0.5rem;
+                font-family: Verdana, Geneva, Tahoma, sans-serif;
+            }
+
+            main {
+                display: flex;
+                flex-direction: row;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            main > * {
+                flex: 1;
+                overflow: hidden;
+            }
+
+            #controls {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            label {
+                display: grid;
+                gap: 0.5rem;
+                grid-template-columns: auto 1fr;
+            }
+
+            input {
+                font-family: inherit;
+            }
+
+            input[type="range"] {
+                margin-inline-end: 2rem;
+                position: relative;
+            }
+
+            input[type="range"]::after {
+                content: attr(value);
+                position: absolute;
+                inset-inline-end: -2rem;
+            }
+
+            #editor {
+                box-sizing: border-box;
+                height: 20rem;
+                width: 100%;
+            }
+
+            #preview {
+                background: url(/grass-tile.png);
+            }
+        </style>
+    </head>
+
+    <body>
+        <main>
+            <div id="controls">
+                <label>
+                    <span>Zoom level</span>
+                    <input
+                        type="range"
+                        id="zoom"
+                        min="16"
+                        max="22"
+                        value="18"
+                    />
+                </label>
+                <textarea id="editor">
+highway=primary
+cycleway=lane
+shoulder=both
+parking:lane:both=parallel
+sidewalk=both
+---
+highway=primary
+cycleway=lane
+shoulder=both
+parking:lane:both=parallel
+sidewalk=both
+                </textarea>
+            </div>
+            <img id="preview" />
+        </main>
+
+        <script>
+            const zoom = document.getElementById("zoom");
+            const editor = document.getElementById("editor");
+            const preview = document.getElementById("preview");
+
+            function updatePreview() {
+                const ways = editor.value
+                    .split("\n---\n")
+                    .map((way) =>
+                        way
+                            .split("\n")
+                            .map((tag) => tag.trim())
+                            .filter((tag) => tag.length > 0)
+                    )
+                    .filter((way) => way.length > 0);
+                preview.src = `/test/${zoom.value}/junction.png?${ways
+                    .map((way) => `ways=${encodeURIComponent(way.join("\n"))}`)
+                    .join("&")}`;
+            }
+
+            let updateTimer = 0;
+            function updatePreviewDelayed() {
+                zoom.setAttribute("value", zoom.value);
+                clearTimeout(updateTimer);
+                updateTimer = setTimeout(updatePreview, 1000);
+            }
+            zoom.addEventListener("input", updatePreviewDelayed);
+            editor.addEventListener("input", updatePreviewDelayed);
+            updatePreviewDelayed();
+        </script>
+    </body>
+</html>
