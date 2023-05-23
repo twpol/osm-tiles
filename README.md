@@ -3,6 +3,8 @@
 A tile renderer for OpenStreetMap that provides the following tile sets:
 
 - Road overlay
+- Rail overlay
+- All overlay (combines above)
 
 [![Build status](https://ci.appveyor.com/api/projects/status/n7l46b5cjdrxhtmg?svg=true)](https://ci.appveyor.com/project/twpol/osm-tiles)
 
@@ -10,11 +12,12 @@ A tile renderer for OpenStreetMap that provides the following tile sets:
 
 A live version is running at https://osm-tiles.james-ross.co.uk/.
 
+A test page for any OpenStreetMap tags is at https://osm-tiles.james-ross.co.uk/test.html.
+
 ## Road overlay
 
 This tile set is an overlay (meaning the tiles are transparent where there is no data) which renders roads (highways) from OpenStreetMap according to their various tags, including:
 
-- `sidewalk=both =left =right`
 - `cycleway=lane =opposite_lane`
 - `cycleway:both=lane =opposite_lane`
 - `cycleway:left=lane =opposite_lane`
@@ -23,30 +26,39 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 - `cycleway:right:oneway=no`
 - `highway=motorway =trunk =primary =secondary =tertiary =unclassified =residential =service =motorway_link =trunk_link =primary_link =secondary_link =tertiary_link`
 - `lanes=*`
-- `lanes:forward=*`
 - `lanes:backward=*`
 - `lanes:both_ways=*`
+- `lanes:forward=*`
+- `layer=*`
 - `oneway=yes =-1`
 - `parking:lane:both=parallel =diagonal =perpendicular`
 - `parking:lane:left=parallel =diagonal =perpendicular`
 - `parking:lane:right=parallel =diagonal =perpendicular`
-- `shoulder=yes =left =right =both`
+- `shoulder=yes =both =left =right`
+- `shoulder:both=yes`
 - `shoulder:left=yes`
 - `shoulder:right=yes`
-- `shoulder:both=yes`
-- `layer=*`
+- `sidewalk=both =left =right`
 
-### Limitations
+## Rail overlay
 
-- Only zoom levels 16 through 22 are supported.
+This tile set is an overlay (meaning the tiles are transparent where there is no data) which renders rails (railways) from OpenStreetMap according to their various tags, including:
 
-### Current rendering
+- `gauge=*`
+- `railway=abandoned =construction =disused =funicular =light_rail =monorail =narrow_gauge =preserved =rail =subway =tram`
 
-![Example tile](Documentation/18-130908-87186.png)
+## Current rendering
 
-## Notes
+| Type | Image |
+|---|---|
+| Road overlay | ![Example road tile](Documentation/roads-18-131004-87172.png) |
+| Rail overlay | ![Example rail tile](Documentation/rails-18-131004-87172.png) |
+| All overlay  | ![Example all tile](Documentation/all-18-131004-87172.png) |
 
-- Each tile is rendered on-demand, but the underlying data is cached in memory in zoom level 14 chunks.
+## Limitations and notes
+
+- Only zoom levels 16 through 22 are supported
+- Each tile is rendered on-demand, but the underlying data is cached in memory in zoom level 14 chunks
 
 ## To do
 
@@ -60,3 +72,5 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 - Display bridges, tunnels
 - Display bus, PSV, other specialised lanes
 - Display turn lane markings (left/right turn arrows, etc.)
+- Display of footpaths
+- Display of railway platforms
