@@ -81,13 +81,14 @@ cycleway=lane
 shoulder=both
 parking:lane:both=parallel
 sidewalk=both
----
+----
 highway=primary
 cycleway=lane
 shoulder=both
 parking:lane:both=parallel
 sidewalk=both
-                </textarea>
+----</textarea
+                >
             </div>
             <img id="preview" />
         </main>
@@ -96,15 +97,18 @@ sidewalk=both
             const zoom = document.getElementById("zoom");
             const editor = document.getElementById("editor");
             const preview = document.getElementById("preview");
+            const waySplit = new RegExp("\n+(-+)\n+");
 
             function updatePreview() {
-                const ways = editor.value
-                    .split("\n---\n")
+                const ways = ("\n" + editor.value + "\n")
+                    .split(waySplit)
                     .map((way) =>
-                        way
-                            .split("\n")
-                            .map((tag) => tag.trim())
-                            .filter((tag) => tag.length > 0)
+                        way[0] === "-"
+                            ? [way]
+                            : way
+                                  .split("\n")
+                                  .map((tag) => tag.trim())
+                                  .filter((tag) => tag.length > 0)
                     )
                     .filter((way) => way.length > 0);
                 preview.src = `/test/${zoom.value}/junction.png?${ways

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using TileService.Models.Common;
@@ -18,19 +19,22 @@ namespace TileService.Controllers.Overlays
             var tile = new Tile(zoom, 0, 0);
             var tileCenter = (tile.NW + tile.SE) / 2;
             var tileSize = tile.SE - tile.NW;
-            var overpassWays = ways.Select((way, i) => new Element()
+            var wayGaps = ways.Where(way => way.StartsWith("-")).Select(way => way.Length).Prepend(0).CumulativeSum().ToArray();
+            var wayGapTotal = wayGaps.Last();
+            var overpassWays = ways.Where(way => !way.StartsWith("-")).Select((way, i) => new Element()
             {
                 id = 2001 + i,
                 type = "way",
                 tags = way.Split('\n').Where(tag => tag.Contains('=')).Select(tag => tag.Split('=')).ToDictionary(tag => tag[0], tag => tag[1]),
                 nodes = new long[] { 1001, 1002 + i },
             }).ToArray();
-            var overpassNodes = Enumerable.Range(0, ways.Length + 1).Select(i => new Element()
+            Debug.Assert(wayGaps.Length == overpassWays.Length + 1, "Number of ways and gaps must match");
+            var overpassNodes = Enumerable.Range(0, wayGaps.Length).Select(i => new Element()
             {
                 id = 1001 + i,
                 type = "node",
-                lat = tileCenter.Lat + (i == 0 ? 0 : Math.Sin(i * 2 * Math.PI / ways.Length) * tileSize.Lat),
-                lon = tileCenter.Lon + (i == 0 ? 0 : Math.Cos(i * 2 * Math.PI / ways.Length) * tileSize.Lon),
+                lat = tileCenter.Lat + (i == 0 ? 0 : Math.Sin(wayGaps[i] * 2 * Math.PI / wayGapTotal) * tileSize.Lat),
+                lon = tileCenter.Lon + (i == 0 ? 0 : Math.Cos(wayGaps[i] * 2 * Math.PI / wayGapTotal) * tileSize.Lon),
             }).ToArray();
             tile.Load(overpassWays, overpassNodes);
 
