@@ -29,7 +29,8 @@ namespace TileService.Models.Geometry
 
         public override string ToString()
         {
-            if (Width == 0) {
+            if (Width == 0)
+            {
                 return $"{Type}{DirectionKey[Direction]}";
             }
             return $"{Type}{DirectionKey[Direction]} {Width:F1}m";
@@ -40,6 +41,7 @@ namespace TileService.Models.Geometry
     {
         Edge,
         Sidewalk,
+        Verge,
         Parking,
         Shoulder,
         Cycle,

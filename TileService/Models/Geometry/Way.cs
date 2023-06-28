@@ -9,6 +9,7 @@ namespace TileService.Models.Geometry
     public class Way
     {
         static readonly float LaneWidthSidewalk = 2.0f;
+        static readonly float LaneWidthVerge = 2.0f;
         static readonly float LaneWidthShoulder = 3.0f;
         static readonly float LaneWidthCycle = 1.0f;
         static readonly float LaneWidthCar = 3.0f;
@@ -23,7 +24,8 @@ namespace TileService.Models.Geometry
             Tags = ImmutableDictionary.ToImmutableDictionary(tags);
             Points = ImmutableList.ToImmutableList(points);
             Segments = ImmutableList.ToImmutableList(
-                Enumerable.Range(0, Points.Count - 1).Select(index => {
+                Enumerable.Range(0, Points.Count - 1).Select(index =>
+                {
                     return new Line(tile, Points[index], Points[index + 1]);
                 })
             );
@@ -42,17 +44,21 @@ namespace TileService.Models.Geometry
             var center = 0f;
 
             var drivingLanes = GetDrivingLanes(way);
-            if (drivingLanes.Total == 0) {
+            if (drivingLanes.Total == 0)
+            {
                 return new Road(lanes, center);
             }
 
-            for (var i = 1; i <= drivingLanes.Forward; i++) {
+            for (var i = 1; i <= drivingLanes.Forward; i++)
+            {
                 lanes.Add(new Lane(LaneType.Car, LaneDirection.Forward, LaneWidthCar));
             }
-            for (var i = 1; i <= drivingLanes.Both; i++) {
+            for (var i = 1; i <= drivingLanes.Both; i++)
+            {
                 lanes.Add(new Lane(LaneType.Car, LaneDirection.Both, LaneWidthCar));
             }
-            for (var i = 1; i <= drivingLanes.Backward; i++) {
+            for (var i = 1; i <= drivingLanes.Backward; i++)
+            {
                 lanes.Add(new Lane(LaneType.Car, LaneDirection.Backward, LaneWidthCar));
             }
             center += LaneWidthCar * drivingLanes.Total / 2;
@@ -65,42 +71,59 @@ namespace TileService.Models.Geometry
             var cyclewayTwowayBoth = way.Tags.GetValueOrDefault("cycleway:both:oneway", "yes") == "no";
             var cyclewayTwowayLeft = way.Tags.GetValueOrDefault("cycleway:left:oneway", "yes") == "no";
             var cyclewayTwowayRight = way.Tags.GetValueOrDefault("cycleway:right:oneway", "yes") == "no";
-            if (cyclewayBoth != "no") {
+            if (cyclewayBoth != "no")
+            {
                 cyclewayLeft = cyclewayBoth;
                 cyclewayRight = cyclewayBoth;
             }
-            if (cyclewayTwowayBoth) {
+            if (cyclewayTwowayBoth)
+            {
                 cyclewayTwowayLeft = true;
                 cyclewayTwowayRight = true;
             }
-            if (cycleway != "no") {
+            if (cycleway != "no")
+            {
                 cyclewayLeft = cycleway;
                 if (!drivingLanes.Oneway) cyclewayRight = cycleway;
             }
-            if (cyclewayTwowayLeft) {
-                if (cyclewayLeft == "lane") {
+            if (cyclewayTwowayLeft)
+            {
+                if (cyclewayLeft == "lane")
+                {
                     lanes.Insert(0, new Lane(LaneType.Cycle, LaneDirection.Backward, LaneWidthCycle));
                     lanes.Insert(0, new Lane(LaneType.Cycle, LaneDirection.Forward, LaneWidthCycle));
                     center += LaneWidthCycle * 2;
                 }
-            } else {
-                if (cyclewayLeft == "lane") {
+            }
+            else
+            {
+                if (cyclewayLeft == "lane")
+                {
                     lanes.Insert(0, new Lane(LaneType.Cycle, LaneDirection.Forward, LaneWidthCycle));
                     center += LaneWidthCycle;
-                } else if (cyclewayLeft == "opposite_lane") {
+                }
+                else if (cyclewayLeft == "opposite_lane")
+                {
                     lanes.Insert(0, new Lane(LaneType.Cycle, LaneDirection.Backward, LaneWidthCycle));
                     center += LaneWidthCycle;
                 }
             }
-            if (cyclewayTwowayRight) {
-                if (cyclewayRight == "lane") {
+            if (cyclewayTwowayRight)
+            {
+                if (cyclewayRight == "lane")
+                {
                     lanes.Add(new Lane(LaneType.Cycle, LaneDirection.Forward, LaneWidthCycle));
                     lanes.Add(new Lane(LaneType.Cycle, LaneDirection.Backward, LaneWidthCycle));
                 }
-            } else {
-                if (cyclewayRight == "lane") {
+            }
+            else
+            {
+                if (cyclewayRight == "lane")
+                {
                     lanes.Add(new Lane(LaneType.Cycle, !drivingLanes.Oneway ? LaneDirection.Backward : LaneDirection.Forward, LaneWidthCycle));
-                } else if (cyclewayRight == "opposite_lane") {
+                }
+                else if (cyclewayRight == "opposite_lane")
+                {
                     lanes.Add(new Lane(LaneType.Cycle, !drivingLanes.Oneway ? LaneDirection.Forward : LaneDirection.Backward, LaneWidthCycle));
                 }
             }
@@ -109,7 +132,8 @@ namespace TileService.Models.Geometry
             var shoulderBoth = way.Tags.GetValueOrDefault("shoulder:both", "no");
             var shoulderLeft = way.Tags.GetValueOrDefault("shoulder:left", "no");
             var shoulderRight = way.Tags.GetValueOrDefault("shoulder:right", "no");
-            if (shoulderBoth != "no") {
+            if (shoulderBoth != "no")
+            {
                 shoulderLeft = shoulderBoth;
                 shoulderRight = shoulderBoth;
             }
@@ -130,36 +154,76 @@ namespace TileService.Models.Geometry
                     shoulderRight = "yes";
                     break;
             }
-            if (shoulderLeft == "yes") {
+            if (shoulderLeft == "yes")
+            {
                 lanes.Insert(0, new Lane(LaneType.Shoulder, LaneDirection.Forward, LaneWidthShoulder));
                 center += LaneWidthShoulder;
             }
-            if (shoulderRight == "yes") {
+            if (shoulderRight == "yes")
+            {
                 lanes.Add(new Lane(LaneType.Shoulder, !drivingLanes.Oneway ? LaneDirection.Backward : LaneDirection.Forward, LaneWidthShoulder));
             }
 
             var parkingLeftLanes = GetWidthOfParkingLanes(way, ":left");
-            if (parkingLeftLanes > 0) {
+            if (parkingLeftLanes > 0)
+            {
                 lanes.Insert(0, new Lane(LaneType.Parking, parkingLeftLanes));
                 center += parkingLeftLanes;
             }
             var parkingRightLanes = GetWidthOfParkingLanes(way, ":right");
-            if (parkingRightLanes > 0) {
+            if (parkingRightLanes > 0)
+            {
                 lanes.Add(new Lane(LaneType.Parking, parkingRightLanes));
             }
             var parkingBothLanes = GetWidthOfParkingLanes(way, ":both");
-            if (parkingBothLanes > 0) {
+            if (parkingBothLanes > 0)
+            {
                 lanes.Insert(0, new Lane(LaneType.Parking, parkingBothLanes));
                 lanes.Add(new Lane(LaneType.Parking, parkingBothLanes));
                 center += parkingBothLanes;
             }
 
+            var verge = way.Tags.GetValueOrDefault("verge", "no");
+            var vergeBoth = way.Tags.GetValueOrDefault("verge:both", "no");
+            var vergeLeft = way.Tags.GetValueOrDefault("verge:left", "no");
+            var vergeRight = way.Tags.GetValueOrDefault("verge:right", "no");
+            if (vergeBoth != "no")
+            {
+                vergeLeft = vergeBoth;
+                vergeRight = vergeBoth;
+            }
+            switch (verge)
+            {
+                case "yes":
+                case "both":
+                    vergeLeft = "yes";
+                    vergeRight = "yes";
+                    break;
+                case "left":
+                    vergeLeft = "yes";
+                    break;
+                case "right":
+                    vergeRight = "yes";
+                    break;
+            }
+            if (vergeLeft == "yes")
+            {
+                lanes.Insert(0, new Lane(LaneType.Verge, LaneWidthVerge));
+                center += LaneWidthVerge;
+            }
+            if (vergeRight == "yes")
+            {
+                lanes.Add(new Lane(LaneType.Verge, LaneWidthVerge));
+            }
+
             var sidewalk = way.Tags.GetValueOrDefault("sidewalk", "no");
-            if (sidewalk == "both" || sidewalk == "left") {
+            if (sidewalk == "both" || sidewalk == "left")
+            {
                 lanes.Insert(0, new Lane(LaneType.Sidewalk, LaneWidthSidewalk));
                 center += LaneWidthSidewalk;
             }
-            if (sidewalk == "both" || sidewalk == "right") {
+            if (sidewalk == "both" || sidewalk == "right")
+            {
                 lanes.Add(new Lane(LaneType.Sidewalk, LaneWidthSidewalk));
             }
 
@@ -203,46 +267,67 @@ namespace TileService.Models.Geometry
             var numBackward = ParseInt(lanesBackward);
             var numBoth = ParseInt(lanesBothWays);
 
-            if (numTotal.HasValue) {
-                if (numForward.HasValue && numBackward.HasValue && numBoth.HasValue) {
+            if (numTotal.HasValue)
+            {
+                if (numForward.HasValue && numBackward.HasValue && numBoth.HasValue)
+                {
                     // lanes= + lanes:forward= + lanes:backward= + lanes:both_ways=
-                } else if (numForward.HasValue && numBackward.HasValue && !numBoth.HasValue) {
+                }
+                else if (numForward.HasValue && numBackward.HasValue && !numBoth.HasValue)
+                {
                     // lanes= + lanes:forward= + lanes:backward=
                     numBoth = numTotal - numForward - numBackward;
-                } else if (numForward.HasValue && !numBackward.HasValue) {
+                }
+                else if (numForward.HasValue && !numBackward.HasValue)
+                {
                     // lanes= + lanes:forward= [+ lanes:both_ways=]
                     numBackward = numTotal - numForward - (numBoth ?? 0);
-                } else if (!numForward.HasValue && numBackward.HasValue) {
+                }
+                else if (!numForward.HasValue && numBackward.HasValue)
+                {
                     // lanes= + lanes:backward= [+ lanes:both_ways=]
                     numForward = numTotal - numBackward - (numBoth ?? 0);
-                } else if (!numForward.HasValue && !numBackward.HasValue && numBoth.HasValue) {
+                }
+                else if (!numForward.HasValue && !numBackward.HasValue && numBoth.HasValue)
+                {
                     // lanes= + lanes:both_ways=
                     var remaining = numTotal - numBoth;
                     numForward = isOneway ? remaining : remaining / 2;
                     numBackward = isOneway ? 0 : remaining - numForward;
-                } else if (!numForward.HasValue && !numBackward.HasValue && !numBoth.HasValue) {
+                }
+                else if (!numForward.HasValue && !numBackward.HasValue && !numBoth.HasValue)
+                {
                     // lanes=
                     numForward = isOneway ? numTotal : numTotal / 2;
                     numBackward = isOneway ? 0 : numTotal / 2;
                     numBoth = isOneway ? 0 : numTotal % 2;
                 }
                 numBoth = numBoth ?? 0;
-            } else {
+            }
+            else
+            {
                 // Based on https://wiki.openstreetmap.org/wiki/Key:lanes#Assumptions
                 var defaultLanes =
                     isOneway ? 1 :
                     highway == "unclassified" || highway == "service" ? 1 :
                     2;
                 numBoth = numBoth ?? 0;
-                if (numForward.HasValue && numBackward.HasValue) {
+                if (numForward.HasValue && numBackward.HasValue)
+                {
                     // lanes:forward= + lanes:backward= [+ lanes:both_ways=]
-                } else if (numForward.HasValue && !numBackward.HasValue) {
+                }
+                else if (numForward.HasValue && !numBackward.HasValue)
+                {
                     // lanes:forward= [+ lanes:both_ways=]
                     numBackward = defaultLanes - numForward - numBoth;
-                } else if (!numForward.HasValue && numBackward.HasValue) {
+                }
+                else if (!numForward.HasValue && numBackward.HasValue)
+                {
                     // lanes:backward= [+ lanes:both_ways=]
                     numForward = defaultLanes - numBackward - numBoth;
-                } else if (!numForward.HasValue && !numBackward.HasValue) {
+                }
+                else if (!numForward.HasValue && !numBackward.HasValue)
+                {
                     // [lanes:both_ways=]
                     numForward = 1;
                     numBackward = defaultLanes == 2 ? 1 : 0;
@@ -250,11 +335,13 @@ namespace TileService.Models.Geometry
                 numTotal = numForward + numBackward + numBoth;
             }
 
-            if (numTotal != numForward + numBackward + numBoth || numTotal < 1 || numForward < 0 || numBackward < 0 || numBoth < 0 || (isOneway && numTotal != numForward)) {
+            if (numTotal != numForward + numBackward + numBoth || numTotal < 1 || numForward < 0 || numBackward < 0 || numBoth < 0 || (isOneway && numTotal != numForward))
+            {
                 Console.WriteLine($"Warning: Unusual combination of oneway/lanes (name={way.Tags.GetValueOrDefault("name")} oneway={oneway} lanes={lanes} lanes:forward={lanesForward} lanes:backward={lanesBackward} lanes:both_ways={lanesBothWays})");
             }
 
-            return new DrivingLanes {
+            return new DrivingLanes
+            {
                 Motorway = isMotorway,
                 Oneway = isOneway,
                 Forward = numForward.Value,
@@ -265,7 +352,8 @@ namespace TileService.Models.Geometry
 
         static float GetWidthOfParkingLanes(Way way, string side)
         {
-            switch (way.Tags.GetValueOrDefault("parking:lane" + side, "no")) {
+            switch (way.Tags.GetValueOrDefault("parking:lane" + side, "no"))
+            {
                 case "parallel":
                     return LaneWidthCar;
                 case "diagonal":
