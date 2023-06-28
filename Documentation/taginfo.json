@@ -224,6 +224,13 @@
         },
         {
             "key": "shoulder",
+            "value": "both",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
+            "description": "Roads: Displays a shoulder lane on both sides of the road"
+        },
+        {
+            "key": "shoulder",
             "value": "left",
             "object_types": ["way"],
             "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
@@ -235,13 +242,6 @@
             "object_types": ["way"],
             "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
             "description": "Roads: Displays a shoulder lane on the right side of the road"
-        },
-        {
-            "key": "shoulder",
-            "value": "both",
-            "object_types": ["way"],
-            "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
-            "description": "Roads: Displays a shoulder lane on both sides of the road"
         },
         {
             "key": "shoulder:both",
@@ -263,6 +263,55 @@
             "object_types": ["way"],
             "icon_url": "https://dummyimage.com/16x16.gif/C0C0C0&text=+",
             "description": "Roads: Displays a shoulder lane on the right side of the road"
+        },
+        {
+            "key": "verge",
+            "value": "yes",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/004000&text=+",
+            "description": "Roads: Displays a verge on both sides of the road"
+        },
+        {
+            "key": "verge",
+            "value": "both",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/004000&text=+",
+            "description": "Roads: Displays a verge on both sides of the road"
+        },
+        {
+            "key": "verge",
+            "value": "left",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/004000&text=+",
+            "description": "Roads: Displays a verge on the left side of the road"
+        },
+        {
+            "key": "verge",
+            "value": "right",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/004000&text=+",
+            "description": "Roads: Displays a verge on the right side of the road"
+        },
+        {
+            "key": "verge:both",
+            "value": "yes",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/004000&text=+",
+            "description": "Roads: Displays a verge on both sides of the road"
+        },
+        {
+            "key": "verge:left",
+            "value": "yes",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/004000&text=+",
+            "description": "Roads: Displays a verge on the left side of the road"
+        },
+        {
+            "key": "verge:right",
+            "value": "yes",
+            "object_types": ["way"],
+            "icon_url": "https://dummyimage.com/16x16.gif/004000&text=+",
+            "description": "Roads: Displays a verge on the right side of the road"
         },
         {
             "key": "layer",

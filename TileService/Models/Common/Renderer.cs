@@ -17,6 +17,7 @@ namespace TileService.Models.Common
         const int LaneKerbZoomMinimum = 19;
         const int LaneLineZoomMinimum = 18;
         static readonly Rgba32 SidewalkColor = new(128, 128, 128);
+        static readonly Rgba32 VergeColor = new(0, 64, 0);
         static readonly Pen KerbLine = new(new Rgba32(192, 192, 192), 1);
         static readonly Rgba32 ParkingColor = new(64, 64, 192);
         static readonly Rgba32 ShoulderColor = new(192, 192, 192);
@@ -150,6 +151,10 @@ namespace TileService.Models.Common
                                         if (lane.Type == LaneType.Sidewalk)
                                         {
                                             RenderLane(context, SidewalkColor, point1, point2, offsetDir1, offsetDir2, offset1, offset2);
+                                        }
+                                        else if (lane.Type == LaneType.Verge)
+                                        {
+                                            RenderLane(context, VergeColor, point1, point2, offsetDir1, offsetDir2, offset1, offset2);
                                         }
                                         offset1 = offset2;
                                     }

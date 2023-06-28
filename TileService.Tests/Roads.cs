@@ -364,6 +364,78 @@ namespace TileService.Tests
             );
         }
 
+        [Fact]
+        public void HighwayRoadVergeYes()
+        {
+            Assert.Equal(
+                "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=5.0m)",
+                GetStraightRoadText("highway=road", "verge=yes")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadVergeBoth()
+        {
+            Assert.Equal(
+                "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=5.0m)",
+                GetStraightRoadText("highway=road", "verge=both")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadVergeBothYes()
+        {
+            Assert.Equal(
+                "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=5.0m)",
+                GetStraightRoadText("highway=road", "verge:both=yes")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadVergeLeft()
+        {
+            Assert.Equal(
+                "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=5.0m)",
+                GetStraightRoadText("highway=road", "verge=left")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadVergeLeftYes()
+        {
+            Assert.Equal(
+                "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=5.0m)",
+                GetStraightRoadText("highway=road", "verge:left=yes")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadVergeRight()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=3.0m)",
+                GetStraightRoadText("highway=road", "verge=right")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadVergeRightYes()
+        {
+            Assert.Equal(
+                "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=3.0m)",
+                GetStraightRoadText("highway=road", "verge:right=yes")
+            );
+        }
+
+        [Fact]
+        public void HighwayRoadCyclewayLaneShoulderBothParkingLaneBothParallelVergeBothSidewalkBoth()
+        {
+            Assert.Equal(
+                "Road(Edge|Sidewalk 2.0m|Verge 2.0m|Parking 3.0m|Shoulder ↑ 3.0m|Cycle ↑ 1.0m|Car ↑ 3.0m|Car ↓ 3.0m|Cycle ↓ 1.0m|Shoulder ↓ 3.0m|Parking 3.0m|Verge 2.0m|Sidewalk 2.0m|Edge, Center=14.0m)",
+                GetStraightRoadText("highway=road", "cycleway=lane", "shoulder=both", "parking:lane:both=parallel", "verge=both", "sidewalk=both")
+            );
+        }
+
         // The following tests are based on the examples found at: https://wiki.openstreetmap.org/wiki/Bicycle
         // In all these tests, left/right have been flipped as wiki is using driving-on-right and we're driving-on-left.
 
@@ -473,7 +545,7 @@ namespace TileService.Tests
         {
             // TODO: cycleway=track not supported:
             // Assert.Equal(
-            //     "Road(Edge|Cycle ↑ 1.0m|Verge 0.5m|Car ↑ 3.0m|Car ↓ 3.0m|Verge 0.5m|Cycle ↓ 1.0m|Edge, Center=4.5m)",
+            //     "Road(Edge|Cycle ↑ 1.0m|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Cycle ↓ 1.0m|Edge, Center=4.5m)",
             //     GetStraightRoadText("highway=road", "cycleway=track")
             // );
         }
@@ -495,7 +567,7 @@ namespace TileService.Tests
         {
             // TODO: cycleway=track not supported:
             // Assert.Equal(
-            //     "Road(Edge|Cycle ↑ 1.0m|Cycle ↓ 1.0m|Verge 0.5m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=5.5m)",
+            //     "Road(Edge|Cycle ↑ 1.0m|Cycle ↓ 1.0m|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=5.5m)",
             //     GetStraightRoadText("highway=road", "cycleway:left=track", "cycleway:left:oneway=no")
             // );
         }
@@ -516,7 +588,7 @@ namespace TileService.Tests
         {
             // TODO: cycleway=track not supported:
             // Assert.Equal(
-            //     "Road(Edge|Cycle ↑ 1.0m|Cycle ↓ 1.0m|Verge 0.5m|Car ↑ 3.0m|Edge, Center=4.0m)",
+            //     "Road(Edge|Cycle ↑ 1.0m|Cycle ↓ 1.0m|Verge 2.0m|Car ↑ 3.0m|Edge, Center=4.0m)",
             //     GetStraightRoadText("highway=road", "oneway=yes", "cycleway:left=track", "oneway:bicycle=no")
             // );
         }
@@ -530,7 +602,7 @@ namespace TileService.Tests
         {
             // TODO: cycleway=track not supported:
             // Assert.Equal(
-            //     "Road(Edge|Cycle ↓ 1.0m|Verge 0.5m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=4.5m)",
+            //     "Road(Edge|Cycle ↓ 1.0m|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=4.5m)",
             //     GetStraightRoadText("highway=road", "cycleway:left=track")
             // );
         }

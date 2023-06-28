@@ -39,6 +39,10 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 - `shoulder:left=yes`
 - `shoulder:right=yes`
 - `sidewalk=both =left =right`
+- `verge=yes =both =left =right`
+- `verge:both=yes`
+- `verge:left=yes`
+- `verge:right=yes`
 
 ## Rail overlay
 
