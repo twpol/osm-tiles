@@ -40,391 +40,54 @@ namespace TileService.Tests
             return GetStraightRoad(GetTagsFromList(tags)).ToString();
         }
 
-        [Fact]
-        public void HighwayRoad()
+        [Theory]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=3.0m)", "highway=road")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↕ 3.0m|Edge, Center=1.5m)", "highway=road", "lanes=1")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=3.0m)", "highway=road", "lanes=2")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Car ↕ 3.0m|Car ↓ 3.0m|Edge, Center=4.5m)", "highway=road", "lanes=3")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Car ↓ 3.0m|Edge, Center=6.0m)", "highway=road", "lanes=4")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Edge, Center=1.5m)", "highway=road", "oneway=yes")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Edge, Center=1.5m)", "highway=road", "oneway=yes", "lanes=1")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=3.0m)", "highway=road", "oneway=yes", "lanes=2")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)", "highway=road", "oneway=yes", "lanes=3")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=6.0m)", "highway=road", "oneway=yes", "lanes=4")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)", "highway=motorway")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)", "highway=motorway", "lanes=1")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=6.0m)", "highway=motorway", "lanes=2")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=7.5m)", "highway=motorway", "lanes=3")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=9.0m)", "highway=motorway", "lanes=4")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)", "highway=motorway", "oneway=yes")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)", "highway=motorway", "oneway=yes", "lanes=1")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=6.0m)", "highway=motorway", "oneway=yes", "lanes=2")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=7.5m)", "highway=motorway", "oneway=yes", "lanes=3")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=9.0m)", "highway=motorway", "oneway=yes", "lanes=4")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=6.0m)", "highway=motorway", "oneway=no")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↕ 3.0m|Shoulder ↓ 3.0m|Edge, Center=4.5m)", "highway=motorway", "oneway=no", "lanes=1")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=6.0m)", "highway=motorway", "oneway=no", "lanes=2")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↕ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=7.5m)", "highway=motorway", "oneway=no", "lanes=3")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=9.0m)", "highway=motorway", "oneway=no", "lanes=4")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=6.0m)", "highway=road", "shoulder=yes")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=6.0m)", "highway=road", "shoulder=both")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=6.0m)", "highway=road", "shoulder:both=yes")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=6.0m)", "highway=road", "shoulder=left")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=6.0m)", "highway=road", "shoulder:left=yes")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=3.0m)", "highway=road", "shoulder=right")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=3.0m)", "highway=road", "shoulder:right=yes")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)", "highway=road", "oneway=yes", "shoulder=yes")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Shoulder ↑ 3.0m|Edge, Center=4.5m)", "highway=road", "oneway=yes", "shoulder=both")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Shoulder ↑ 3.0m|Edge, Center=4.5m)", "highway=road", "oneway=yes", "shoulder:both=yes")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Edge, Center=1.5m)", "highway=motorway", "shoulder=no")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=5.0m)", "highway=road", "verge=yes")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=5.0m)", "highway=road", "verge=both")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=5.0m)", "highway=road", "verge:both=yes")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=5.0m)", "highway=road", "verge=left")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=5.0m)", "highway=road", "verge:left=yes")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=3.0m)", "highway=road", "verge=right")]
+        [InlineData("GetStraightRoadText", "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=3.0m)", "highway=road", "verge:right=yes")]
+        public void StraightRoadTest(string type, string expected, params string[] tags)
         {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=3.0m)",
-                GetStraightRoadText("highway=road")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadLanes1()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↕ 3.0m|Edge, Center=1.5m)",
-                GetStraightRoadText("highway=road", "lanes=1")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadLanes2()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=3.0m)",
-                GetStraightRoadText("highway=road", "lanes=2")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadLanes3()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Car ↕ 3.0m|Car ↓ 3.0m|Edge, Center=4.5m)",
-                GetStraightRoadText("highway=road", "lanes=3")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadLanes4()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Car ↓ 3.0m|Edge, Center=6.0m)",
-                GetStraightRoadText("highway=road", "lanes=4")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadOnewayYes()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Edge, Center=1.5m)",
-                GetStraightRoadText("highway=road", "oneway=yes")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadOnewayYesLanes1()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Edge, Center=1.5m)",
-                GetStraightRoadText("highway=road", "oneway=yes", "lanes=1")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadOnewayYesLanes2()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=3.0m)",
-                GetStraightRoadText("highway=road", "oneway=yes", "lanes=2")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadOnewayYesLanes3()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)",
-                GetStraightRoadText("highway=road", "oneway=yes", "lanes=3")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadOnewayYesLanes4()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=6.0m)",
-                GetStraightRoadText("highway=road", "oneway=yes", "lanes=4")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorway()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)",
-                GetStraightRoadText("highway=motorway")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayLanes1()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)",
-                GetStraightRoadText("highway=motorway", "lanes=1")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayLanes2()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=6.0m)",
-                GetStraightRoadText("highway=motorway", "lanes=2")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayLanes3()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=7.5m)",
-                GetStraightRoadText("highway=motorway", "lanes=3")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayLanes4()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=9.0m)",
-                GetStraightRoadText("highway=motorway", "lanes=4")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayOnewayYes()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)",
-                GetStraightRoadText("highway=motorway", "oneway=yes")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayOnewayLanes1()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)",
-                GetStraightRoadText("highway=motorway", "oneway=yes", "lanes=1")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayOnewayLanes2()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=6.0m)",
-                GetStraightRoadText("highway=motorway", "oneway=yes", "lanes=2")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayOnewayLanes3()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=7.5m)",
-                GetStraightRoadText("highway=motorway", "oneway=yes", "lanes=3")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayOnewayLanes4()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Edge, Center=9.0m)",
-                GetStraightRoadText("highway=motorway", "oneway=yes", "lanes=4")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayOnewayNo()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=6.0m)",
-                GetStraightRoadText("highway=motorway", "oneway=no")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayOnewayNoLanes1()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↕ 3.0m|Shoulder ↓ 3.0m|Edge, Center=4.5m)",
-                GetStraightRoadText("highway=motorway", "oneway=no", "lanes=1")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayOnewayNoLanes2()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=6.0m)",
-                GetStraightRoadText("highway=motorway", "oneway=no", "lanes=2")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayOnewayNoLanes3()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↕ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=7.5m)",
-                GetStraightRoadText("highway=motorway", "oneway=no", "lanes=3")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayOnewayNoLanes4()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=9.0m)",
-                GetStraightRoadText("highway=motorway", "oneway=no", "lanes=4")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadShoulderYes()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=6.0m)",
-                GetStraightRoadText("highway=road", "shoulder=yes")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadShoulderBoth()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=6.0m)",
-                GetStraightRoadText("highway=road", "shoulder=both")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadShoulderBothYes()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=6.0m)",
-                GetStraightRoadText("highway=road", "shoulder:both=yes")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadShoulderLeft()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=6.0m)",
-                GetStraightRoadText("highway=road", "shoulder=left")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadShoulderLeftYes()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=6.0m)",
-                GetStraightRoadText("highway=road", "shoulder:left=yes")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadShoulderRight()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=3.0m)",
-                GetStraightRoadText("highway=road", "shoulder=right")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadShoulderRightYes()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Shoulder ↓ 3.0m|Edge, Center=3.0m)",
-                GetStraightRoadText("highway=road", "shoulder:right=yes")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadOnewayShoulderYes()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Edge, Center=4.5m)",
-                GetStraightRoadText("highway=road", "oneway=yes", "shoulder=yes")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadOnewayShoulderBoth()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Shoulder ↑ 3.0m|Edge, Center=4.5m)",
-                GetStraightRoadText("highway=road", "oneway=yes", "shoulder=both")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadOnewayShoulderBothYes()
-        {
-            Assert.Equal(
-                "Road(Edge|Shoulder ↑ 3.0m|Car ↑ 3.0m|Shoulder ↑ 3.0m|Edge, Center=4.5m)",
-                GetStraightRoadText("highway=road", "oneway=yes", "shoulder:both=yes")
-            );
-        }
-
-        [Fact]
-        public void HighwayMotorwayShoulderNo()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Edge, Center=1.5m)",
-                GetStraightRoadText("highway=motorway", "shoulder=no")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadVergeYes()
-        {
-            Assert.Equal(
-                "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=5.0m)",
-                GetStraightRoadText("highway=road", "verge=yes")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadVergeBoth()
-        {
-            Assert.Equal(
-                "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=5.0m)",
-                GetStraightRoadText("highway=road", "verge=both")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadVergeBothYes()
-        {
-            Assert.Equal(
-                "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=5.0m)",
-                GetStraightRoadText("highway=road", "verge:both=yes")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadVergeLeft()
-        {
-            Assert.Equal(
-                "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=5.0m)",
-                GetStraightRoadText("highway=road", "verge=left")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadVergeLeftYes()
-        {
-            Assert.Equal(
-                "Road(Edge|Verge 2.0m|Car ↑ 3.0m|Car ↓ 3.0m|Edge, Center=5.0m)",
-                GetStraightRoadText("highway=road", "verge:left=yes")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadVergeRight()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=3.0m)",
-                GetStraightRoadText("highway=road", "verge=right")
-            );
-        }
-
-        [Fact]
-        public void HighwayRoadVergeRightYes()
-        {
-            Assert.Equal(
-                "Road(Edge|Car ↑ 3.0m|Car ↓ 3.0m|Verge 2.0m|Edge, Center=3.0m)",
-                GetStraightRoadText("highway=road", "verge:right=yes")
-            );
+            Assert.Equal("GetStraightRoadText", type);
+            Assert.Equal(expected, GetStraightRoadText(tags));
         }
 
         [Fact]
