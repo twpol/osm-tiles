@@ -1,18 +1,18 @@
 # OpenStreetMap Tiles
 
-A tile renderer for OpenStreetMap that provides the following tile sets:
+A tile renderer for OpenStreetMap that provides a dynamic overlay tile set.
 
-- Road overlay
-- Rail overlay
-- All overlay (combines above)
-
-[![Build status](https://ci.appveyor.com/api/projects/status/n7l46b5cjdrxhtmg?svg=true)](https://ci.appveyor.com/project/twpol/osm-tiles)
-
-## Live slippy map and tile server
+- [Road overlay](#road-overlay)
+- [Rail overlay](#rail-overlay)
+- [All overlay](#all-overlay)
+- [Limitations and notes](#limitations-and-notes)
+- [To do](#to-do)
 
 A live version is running at https://osm-tiles.james-ross.co.uk/.
 
 A test page for any OpenStreetMap tags is at https://osm-tiles.james-ross.co.uk/test.html.
+
+[![Build status](https://ci.appveyor.com/api/projects/status/n7l46b5cjdrxhtmg?svg=true)](https://ci.appveyor.com/project/twpol/osm-tiles)
 
 ## Road overlay
 
@@ -44,6 +44,8 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 - `verge:left=yes`
 - `verge:right=yes`
 
+![Example road tile](Documentation/roads-18-131004-87172.png)
+
 ## Rail overlay
 
 This tile set is an overlay (meaning the tiles are transparent where there is no data) which renders rails (railways) from OpenStreetMap according to their various tags, including:
@@ -51,13 +53,11 @@ This tile set is an overlay (meaning the tiles are transparent where there is no
 - `gauge=*`
 - `railway=abandoned =construction =disused =funicular =light_rail =monorail =narrow_gauge =preserved =rail =subway =tram`
 
-## Current rendering
+![Example rail tile](Documentation/rails-18-131004-87172.png)
 
-| Type | Image |
-|---|---|
-| Road overlay | ![Example road tile](Documentation/roads-18-131004-87172.png) |
-| Rail overlay | ![Example rail tile](Documentation/rails-18-131004-87172.png) |
-| All overlay  | ![Example all tile](Documentation/all-18-131004-87172.png) |
+## All overlay
+
+![Example all tile](Documentation/all-18-131004-87172.png)
 
 ## Limitations and notes
 

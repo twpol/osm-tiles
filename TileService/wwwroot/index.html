@@ -36,11 +36,7 @@
                 const state = new URLSearchParams();
                 state.set(
                     "map",
-                    [
-                        map.getZoom(),
-                        map.getCenter().lat.toFixed(4),
-                        map.getCenter().lng.toFixed(4),
-                    ].join("/")
+                    [map.getZoom(), map.getCenter().lat.toFixed(4), map.getCenter().lng.toFixed(4)].join("/")
                 );
                 map.eachLayer((layer) => {
                     state.append("layer", layer.options.id);
@@ -49,41 +45,49 @@
 
                 if (newMapViewState !== mapViewState) {
                     mapViewState = newMapViewState;
-                    history.pushState(
-                        null,
-                        document.title,
-                        "?" + newMapViewState.replace(/%2F/g, "/")
-                    );
+                    history.pushState(null, document.title, "?" + newMapViewState.replace(/%2F/g, "/"));
                 }
             }
 
             function setMapViewFromUrl(map) {
                 const state = new URL(location).searchParams;
+                // No position --> default position
                 if (!state.get("map")) {
                     state.set("map", "18/51.5050/-0.0900");
                 }
+                // No layers --> default layers
                 if (state.getAll("layer").length === 0) {
-                    defaultLayers.forEach((layer) =>
-                        state.append("layer", layer.options.id)
-                    );
+                    ids.default.forEach((id) => state.append("layer", id));
+                }
+                // No base layers --> default base layer
+                if (!ids.base.some((id) => state.getAll("layer").includes(id))) {
+                    state.append("layer", ids.default[0]);
+                }
+                // All layer --> default non-base layers
+                if (state.getAll("layer").includes("all")) {
+                    ids.default.filter((id) => !ids.base.includes(id)).forEach((id) => state.append("layer", id));
                 }
 
                 const viewParts = state.get("map").split("/");
                 map.setView([+viewParts[1], +viewParts[2]], +viewParts[0]);
 
-                const viewLayers = state
-                    .getAll("layer")
-                    .map((layerName) =>
-                        layers.find((layer) => layer.options.id === layerName)
-                    )
-                    .filter((layer) => !!layer);
-                for (const layer of layers) {
-                    if (viewLayers.includes(layer)) {
-                        layer.addTo(map);
+                const viewLayers = state.getAll("layer");
+                for (const layer of layers.all) {
+                    if (viewLayers.includes(layer.options.id)) {
+                        map.addLayer(layer);
                     } else {
-                        layer.remove();
+                        map.removeLayer(layer);
                     }
                 }
+            }
+
+            function updateOverlay() {
+                const types = layers.overlay
+                    .filter((layer) => map.hasLayer(layer))
+                    .map((layer) => layer.options.id)
+                    .join(",");
+                overlay.options.types = types || "none";
+                overlay.redraw();
             }
 
             const map = L.map("map");
@@ -115,99 +119,51 @@
                 }
             );
 
-            const baseOSMStandard = L.tileLayer(
-                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                {
-                    id: "standard",
-                    attribution:
-                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
-                    maxZoom: 22,
-                    maxNativeZoom: 19,
-                }
-            );
-
-            const baseOSMGreyscale = L.tileLayer(
-                "https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png",
-                {
-                    id: "greyscale",
-                    attribution:
-                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
-                    maxZoom: 22,
-                    maxNativeZoom: 19,
-                }
-            );
-
-            const baseOSMNoLabels = L.tileLayer(
-                "https://tiles.wmflabs.org/osm-no-labels/{z}/{x}/{y}.png",
-                {
-                    id: "no-labels",
-                    attribution:
-                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
-                    maxZoom: 22,
-                    maxNativeZoom: 19,
-                }
-            );
-
-            const overlayRoads = L.tileLayer(
-                "/overlays/roads/{z}/{x}/{y}.png",
-                {
-                    id: "roads",
-                    attribution:
-                        'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
-                    minZoom: 16,
-                    maxZoom: 22,
-                }
-            );
-
-            const overlayRails = L.tileLayer(
-                "/overlays/rails/{z}/{x}/{y}.png",
-                {
-                    id: "rails",
-                    attribution:
-                        'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
-                    minZoom: 16,
-                    maxZoom: 22,
-                }
-            );
-
-            const overlayAll = L.tileLayer("/overlays/all/{z}/{x}/{y}.png", {
-                id: "all",
+            const baseOSMStandard = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                id: "standard",
                 attribution:
-                    'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
+                    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
+                maxZoom: 22,
+                maxNativeZoom: 19,
+            });
+
+            const baseOSMGreyscale = L.tileLayer("https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png", {
+                id: "greyscale",
+                attribution:
+                    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
+                maxZoom: 22,
+                maxNativeZoom: 19,
+            });
+
+            const baseOSMNoLabels = L.tileLayer("https://tiles.wmflabs.org/osm-no-labels/{z}/{x}/{y}.png", {
+                id: "no-labels",
+                attribution:
+                    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
+                maxZoom: 22,
+                maxNativeZoom: 19,
+            });
+
+            const overlay = L.tileLayer("/overlays/{types}/{z}/{x}/{y}.png", {
+                id: "overlay",
+                attribution: 'Overlay <a href="https://github.com/twpol/osm-tiles">GitHub project</a>',
                 minZoom: 16,
                 maxZoom: 22,
+                types: "none",
             });
 
-            overlayRoads.on("add", () => {
-                setTimeout(() => {
-                    overlayAll.remove();
-                }, 0);
-            });
-            overlayRails.on("add", () => {
-                setTimeout(() => {
-                    overlayAll.remove();
-                }, 0);
-            });
-            overlayAll.on("add", () => {
-                setTimeout(() => {
-                    overlayRoads.remove();
-                    overlayRails.remove();
-                }, 0);
-            });
+            const overlayRoads = L.tileLayer("", { id: "roads" });
+            const overlayRails = L.tileLayer("", { id: "rails" });
+            const overlayDebug = L.tileLayer("", { id: "debug" });
 
-            const layers = [
-                baseNone,
-                baseGrass,
-                baseTerrain,
-                baseOSMStandard,
-                baseOSMGreyscale,
-                baseOSMNoLabels,
-                overlayRoads,
-                overlayRails,
-                overlayAll,
-            ];
-
-            const defaultLayers = [baseTerrain, overlayAll];
+            const layers = {
+                base: [baseNone, baseGrass, baseTerrain, baseOSMStandard, baseOSMGreyscale, baseOSMNoLabels],
+                overlay: [overlayRoads, overlayRails, overlayDebug],
+                default: [baseTerrain, overlay, overlayRoads, overlayRails],
+            };
+            layers.all = [...layers.base, overlay, ...layers.overlay];
+            const ids = Object.fromEntries(
+                Object.entries(layers).map(([key, layers]) => [key, layers.map((layer) => layer.options.id)])
+            );
 
             L.control
                 .layers(
@@ -220,21 +176,24 @@
                         "No labels": baseOSMNoLabels,
                     },
                     {
+                        Overlay: overlay,
                         Roads: overlayRoads,
                         Rails: overlayRails,
-                        All: overlayAll,
+                        Debug: overlayDebug,
                     }
                 )
                 .addTo(map);
 
             setMapViewFromUrl(map);
             setUrlFromMapView(map);
+            updateOverlay();
 
             window.addEventListener("popstate", () => setMapViewFromUrl(map));
 
-            map.on(
-                "moveend zoomend baselayerchange overlayadd overlayremove",
-                () => setTimeout(() => setUrlFromMapView(map), 100)
+            layers.overlay.forEach((layer) => layer.on("add remove", updateOverlay));
+
+            map.on("moveend zoomend baselayerchange overlayadd overlayremove", () =>
+                setTimeout(() => setUrlFromMapView(map), 100)
             );
         </script>
     </body>

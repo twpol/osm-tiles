@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TileService.Models.Common;
@@ -23,9 +24,11 @@ namespace TileService.Controllers.Overlays
             var tile = await Tile.Cache.Get(zoom, x, y);
 
             var start = DateTimeOffset.UtcNow;
-            var rails = type == "all" || type == "rails";
-            var roads = type == "all" || type == "roads";
-            var stream = Renderer.Render(tile, 256, rails: rails, roads: roads);
+            var types = type.Split(',');
+            var rails = types.Contains("all") || types.Contains("rails");
+            var roads = types.Contains("all") || types.Contains("roads");
+            var debug = types.Contains("debug");
+            var stream = Renderer.Render(tile, 256, rails: rails, roads: roads, debug: debug);
             var end = DateTimeOffset.UtcNow;
             Console.WriteLine($"Rendered {type} on {tile} in {(end - start).TotalMilliseconds:F0} ms");
 
