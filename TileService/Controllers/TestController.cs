@@ -39,7 +39,7 @@ namespace TileService.Controllers.Overlays
             tile.Load(overpassWays, overpassNodes);
 
             var start = DateTimeOffset.UtcNow;
-            var stream = Renderer.Render(tile, 1024, rails: true, roads: true);
+            var stream = Renderer.Render(tile, 1024, rails: true, roads: true, debug: false);
             var end = DateTimeOffset.UtcNow;
             Console.WriteLine($"Rendered {type} on {tile} in {(end - start).TotalMilliseconds:F0} ms");
 

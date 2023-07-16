@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -64,6 +65,10 @@ namespace TileService.Models.Common
         static readonly Rgba32 SleeperColour = new(133, 133, 130); // https://en.wikipedia.org/wiki/List_of_colors - battleship grey
         static readonly Rgba32 BallastColour = new(102, 66, 33); // https://en.wikipedia.org/wiki/List_of_colors - dark brown
 
+        static readonly Rgba32 DebugRoadJunctionGeneric = new(255, 0, 0); // Red
+        static readonly Rgba32 DebugRoadJunctionContinuation = new(0, 255, 255); // Cyan
+        static readonly Rgba32 DebugRoadJunctionMergeSplit = new(0, 255, 0); // Green
+
         static SizeF GetOffset(Tile tile, Line line, Point point)
         {
             var lengthExtension = (float)Math.Cos(Angle.Difference(line.Angle, point.Angle).Radians);
@@ -90,7 +95,7 @@ namespace TileService.Models.Common
             };
         }
 
-        public static MemoryStream Render(Tile tile, int size, bool rails, bool roads)
+        public static MemoryStream Render(Tile tile, int size, bool rails, bool roads, bool debug)
         {
             var image = new Image<Rgba32>(size, size);
             image.Mutate(context =>
@@ -282,6 +287,25 @@ namespace TileService.Models.Common
                                 context.DrawLines(line, railPoints2);
                             }
                         });
+                    }
+                }
+                if (debug)
+                {
+                    if (roads)
+                    {
+                        foreach (var junction in tile.RoadJunctions)
+                        {
+                            var dot = new EllipsePolygon(
+                                tile.GetPointFromPoint(junction.Location) * size,
+                                4
+                            );
+                            context.Fill(
+                                junction.Type == JunctionType.MergeSplit ? DebugRoadJunctionMergeSplit :
+                                junction.Type == JunctionType.Continuation ? DebugRoadJunctionContinuation :
+                                DebugRoadJunctionGeneric,
+                                dot
+                            );
+                        }
                     }
                 }
             });
