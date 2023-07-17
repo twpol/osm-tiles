@@ -33,8 +33,8 @@ namespace TileService.Controllers.Overlays
             {
                 id = 1001 + i,
                 type = "node",
-                lat = tileCenter.Lat + (i == 0 ? 0 : Math.Sin(wayGaps[i] * 2 * Math.PI / wayGapTotal) * tileSize.Lat),
-                lon = tileCenter.Lon + (i == 0 ? 0 : Math.Cos(wayGaps[i] * 2 * Math.PI / wayGapTotal) * tileSize.Lon),
+                lat = tileCenter.Lat + (i == 0 ? 0 : Math.Sin(wayGaps[i] * 2 * Math.PI / wayGapTotal) * tileSize.Lat * Math.Sqrt(2) / 2),
+                lon = tileCenter.Lon + (i == 0 ? 0 : Math.Cos(wayGaps[i] * 2 * Math.PI / wayGapTotal) * tileSize.Lon * Math.Sqrt(2) / 2),
             }).ToArray();
             tile.Load(overpassWays, overpassNodes);
 

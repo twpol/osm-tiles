@@ -17,6 +17,7 @@ namespace TileService.Models.Common
     {
         const int LaneKerbZoomMinimum = 19;
         const int LaneLineZoomMinimum = 18;
+        const int LaneArrowZoomMinimum = 18;
         static readonly Rgba32 SidewalkColor = new(128, 128, 128);
         static readonly Rgba32 VergeColor = new(0, 64, 0);
         static readonly Pen KerbLine = new(new Rgba32(192, 192, 192), 1);
@@ -56,6 +57,7 @@ namespace TileService.Models.Common
             "Cycle|Parking",
             "Cycle|Cycle",
         };
+        static readonly Rgba32 LaneArrowColor = new(255, 255, 255); // White
 
         const int DefaultGaugeMM = 1435;
         const float SleeperWidth = 1.8f; // Sleeper size of 250mm x 130mm x 2600mm vs default gauge is 1.8118466899
@@ -83,6 +85,17 @@ namespace TileService.Models.Common
             {
                 Width = -tile.ImageScale / lengthExtension * cos,
                 Height = tile.ImageScale / lengthExtension * sin
+            };
+        }
+
+        static SizeF GetOffset(Tile tile, Line line)
+        {
+            var sin = (float)Math.Sin(Angle.Subtract(Angle.QuarterTurn, line.Angle).Radians);
+            var cos = (float)Math.Cos(Angle.Subtract(Angle.QuarterTurn, line.Angle).Radians);
+            return new SizeF()
+            {
+                Width = -tile.ImageScale * cos,
+                Height = tile.ImageScale * sin
             };
         }
 
@@ -177,6 +190,7 @@ namespace TileService.Models.Common
                                     var point2 = tile.GetPointFromPoint(line.End) * size;
                                     var offsetDir1 = GetOffset(tile, line, line.Start);
                                     var offsetDir2 = GetOffset(tile, line, line.End);
+                                    var offsetDir = GetOffset(tile, line);
 
                                     var offset1 = -road.Center;
                                     foreach (var lane in road.Lanes)
@@ -197,6 +211,10 @@ namespace TileService.Models.Common
                                         else if (lane.Type == LaneType.Car)
                                         {
                                             RenderLane(context, CarLaneColor, point1, point2, offsetDir1, offsetDir2, offset1, offset2);
+                                            if (road.IsOneWay(LaneType.Car) && tile.Zoom >= LaneArrowZoomMinimum)
+                                            {
+                                                RenderArrow(context, LaneArrowColor, (point1 + point2) / 2, offsetDir, (offset1 + offset2) / 2, lane.Direction, lane.Width);
+                                            }
                                         }
                                         offset1 = offset2;
                                     }
@@ -325,6 +343,18 @@ namespace TileService.Models.Common
                 Offset(point1, offsetDir1, offset2),
                 Offset(point2, offsetDir2, offset2),
                 Offset(point2, offsetDir2, offset1)
+            );
+        }
+
+        static void RenderArrow(IImageProcessingContext context, Rgba32 color, PointF position, SizeF offsetDir, float offset, LaneDirection direction, float size)
+        {
+            var offsetFrontDir = new SizeF(offsetDir.Height, -offsetDir.Width);
+            if (direction == LaneDirection.Backward) offsetFrontDir *= -1;
+            context.FillPolygon(
+                color,
+                Offset(Offset(position, offsetDir, offset + size * 0), offsetFrontDir, +size / 3),
+                Offset(Offset(position, offsetDir, offset + size / 3), offsetFrontDir, -size / 3),
+                Offset(Offset(position, offsetDir, offset - size / 3), offsetFrontDir, -size / 3)
             );
         }
 
