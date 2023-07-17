@@ -151,9 +151,9 @@
                 types: "none",
             });
 
-            const overlayRoads = L.tileLayer("", { id: "roads" });
-            const overlayRails = L.tileLayer("", { id: "rails" });
-            const overlayDebug = L.tileLayer("", { id: "debug" });
+            const overlayRoads = L.tileLayer("", { id: "roads", minZoom: 16, maxZoom: 22 });
+            const overlayRails = L.tileLayer("", { id: "rails", minZoom: 16, maxZoom: 22 });
+            const overlayDebug = L.tileLayer("", { id: "debug", minZoom: 16, maxZoom: 22 });
 
             const layers = {
                 base: [baseNone, baseGrass, baseTerrain, baseOSMStandard, baseOSMGreyscale, baseOSMNoLabels],
