@@ -68,25 +68,25 @@ namespace TileService.Models.Geometry
             var cyclewayBoth = way.Tags.GetValueOrDefault("cycleway:both", "no");
             var cyclewayLeft = way.Tags.GetValueOrDefault("cycleway:left", "no");
             var cyclewayRight = way.Tags.GetValueOrDefault("cycleway:right", "no");
-            var cyclewayTwowayBoth = way.Tags.GetValueOrDefault("cycleway:both:oneway", "yes") == "no";
-            var cyclewayTwowayLeft = way.Tags.GetValueOrDefault("cycleway:left:oneway", "yes") == "no";
-            var cyclewayTwowayRight = way.Tags.GetValueOrDefault("cycleway:right:oneway", "yes") == "no";
+            var cyclewayTwoWayBoth = way.Tags.GetValueOrDefault("cycleway:both:oneway", "yes") == "no";
+            var cyclewayTwoWayLeft = way.Tags.GetValueOrDefault("cycleway:left:oneway", "yes") == "no";
+            var cyclewayTwoWayRight = way.Tags.GetValueOrDefault("cycleway:right:oneway", "yes") == "no";
             if (cyclewayBoth != "no")
             {
                 cyclewayLeft = cyclewayBoth;
                 cyclewayRight = cyclewayBoth;
             }
-            if (cyclewayTwowayBoth)
+            if (cyclewayTwoWayBoth)
             {
-                cyclewayTwowayLeft = true;
-                cyclewayTwowayRight = true;
+                cyclewayTwoWayLeft = true;
+                cyclewayTwoWayRight = true;
             }
             if (cycleway != "no")
             {
-                cyclewayLeft = cycleway;
-                if (!drivingLanes.Oneway) cyclewayRight = cycleway;
+                if (drivingLanes.Direction != LaneDirection.Backward) cyclewayLeft = cycleway;
+                if (drivingLanes.Direction != LaneDirection.Forward) cyclewayRight = cycleway;
             }
-            if (cyclewayTwowayLeft)
+            if (cyclewayTwoWayLeft)
             {
                 if (cyclewayLeft == "lane")
                 {
@@ -99,16 +99,16 @@ namespace TileService.Models.Geometry
             {
                 if (cyclewayLeft == "lane")
                 {
-                    lanes.Insert(0, new Lane(LaneType.Cycle, LaneDirection.Forward, LaneWidthCycle));
+                    lanes.Insert(0, new Lane(LaneType.Cycle, drivingLanes.Direction != LaneDirection.Backward ? LaneDirection.Forward : LaneDirection.Backward, LaneWidthCycle));
                     center += LaneWidthCycle;
                 }
                 else if (cyclewayLeft == "opposite_lane")
                 {
-                    lanes.Insert(0, new Lane(LaneType.Cycle, LaneDirection.Backward, LaneWidthCycle));
+                    lanes.Insert(0, new Lane(LaneType.Cycle, drivingLanes.Direction != LaneDirection.Backward ? LaneDirection.Backward : LaneDirection.Forward, LaneWidthCycle));
                     center += LaneWidthCycle;
                 }
             }
-            if (cyclewayTwowayRight)
+            if (cyclewayTwoWayRight)
             {
                 if (cyclewayRight == "lane")
                 {
@@ -120,11 +120,11 @@ namespace TileService.Models.Geometry
             {
                 if (cyclewayRight == "lane")
                 {
-                    lanes.Add(new Lane(LaneType.Cycle, !drivingLanes.Oneway ? LaneDirection.Backward : LaneDirection.Forward, LaneWidthCycle));
+                    lanes.Add(new Lane(LaneType.Cycle, drivingLanes.Direction != LaneDirection.Forward ? LaneDirection.Backward : LaneDirection.Forward, LaneWidthCycle));
                 }
                 else if (cyclewayRight == "opposite_lane")
                 {
-                    lanes.Add(new Lane(LaneType.Cycle, !drivingLanes.Oneway ? LaneDirection.Forward : LaneDirection.Backward, LaneWidthCycle));
+                    lanes.Add(new Lane(LaneType.Cycle, drivingLanes.Direction != LaneDirection.Forward ? LaneDirection.Forward : LaneDirection.Backward, LaneWidthCycle));
                 }
             }
 
@@ -140,8 +140,8 @@ namespace TileService.Models.Geometry
             switch (shoulder)
             {
                 case "yes":
-                    shoulderLeft = "yes";
-                    if (!drivingLanes.Oneway) shoulderRight = "yes";
+                    if (drivingLanes.Direction != LaneDirection.Backward) shoulderLeft = "yes";
+                    if (drivingLanes.Direction != LaneDirection.Forward) shoulderRight = "yes";
                     break;
                 case "both":
                     shoulderLeft = "yes";
@@ -156,12 +156,12 @@ namespace TileService.Models.Geometry
             }
             if (shoulderLeft == "yes")
             {
-                lanes.Insert(0, new Lane(LaneType.Shoulder, LaneDirection.Forward, LaneWidthShoulder));
+                lanes.Insert(0, new Lane(LaneType.Shoulder, drivingLanes.Direction != LaneDirection.Backward ? LaneDirection.Forward : LaneDirection.Backward, LaneWidthShoulder));
                 center += LaneWidthShoulder;
             }
             if (shoulderRight == "yes")
             {
-                lanes.Add(new Lane(LaneType.Shoulder, !drivingLanes.Oneway ? LaneDirection.Backward : LaneDirection.Forward, LaneWidthShoulder));
+                lanes.Add(new Lane(LaneType.Shoulder, drivingLanes.Direction != LaneDirection.Forward ? LaneDirection.Backward : LaneDirection.Forward, LaneWidthShoulder));
             }
 
             var parkingLeftLanes = GetWidthOfParkingLanes(way, ":left");
@@ -236,7 +236,7 @@ namespace TileService.Models.Geometry
         struct DrivingLanes
         {
             public bool Motorway;
-            public bool Oneway;
+            public LaneDirection Direction;
             public int Forward;
             public int Both;
             public int Backward;
@@ -261,7 +261,7 @@ namespace TileService.Models.Geometry
             var lanesBothWays = way.Tags.GetValueOrDefault("lanes:both_ways"); // NOTE: This is only a proposal!
 
             // Based on https://wiki.openstreetmap.org/wiki/Key:lanes#Lanes_in_different_directions
-            var isOneway = oneway == "yes" || oneway == "-1";
+            var direction = oneway == "yes" ? LaneDirection.Forward : oneway == "-1" ? LaneDirection.Backward : LaneDirection.Both;
             var numTotal = ParseInt(lanes);
             var numForward = ParseInt(lanesForward);
             var numBackward = ParseInt(lanesBackward);
@@ -292,26 +292,23 @@ namespace TileService.Models.Geometry
                 {
                     // lanes= + lanes:both_ways=
                     var remaining = numTotal - numBoth;
-                    numForward = isOneway ? remaining : remaining / 2;
-                    numBackward = isOneway ? 0 : remaining - numForward;
+                    numForward = direction == LaneDirection.Forward ? remaining : direction == LaneDirection.Backward ? 0 : remaining / 2;
+                    numBackward = direction == LaneDirection.Forward ? 0 : direction == LaneDirection.Backward ? remaining : remaining - numForward;
                 }
                 else if (!numForward.HasValue && !numBackward.HasValue && !numBoth.HasValue)
                 {
                     // lanes=
-                    numForward = isOneway ? numTotal : numTotal / 2;
-                    numBackward = isOneway ? 0 : numTotal / 2;
-                    numBoth = isOneway ? 0 : numTotal % 2;
+                    numForward = direction == LaneDirection.Forward ? numTotal : direction == LaneDirection.Backward ? 0 : numTotal / 2;
+                    numBackward = direction == LaneDirection.Forward ? 0 : direction == LaneDirection.Backward ? numTotal : numTotal / 2;
+                    numBoth = direction == LaneDirection.Forward || direction == LaneDirection.Backward ? 0 : numTotal % 2;
                 }
-                numBoth = numBoth ?? 0;
+                numBoth ??= 0;
             }
             else
             {
                 // Based on https://wiki.openstreetmap.org/wiki/Key:lanes#Assumptions
-                var defaultLanes =
-                    isOneway ? 1 :
-                    highway == "unclassified" || highway == "service" ? 1 :
-                    2;
-                numBoth = numBoth ?? 0;
+                var defaultLanes = direction != LaneDirection.Both || highway == "unclassified" || highway == "service" ? 1 : 2;
+                numBoth ??= 0;
                 if (numForward.HasValue && numBackward.HasValue)
                 {
                     // lanes:forward= + lanes:backward= [+ lanes:both_ways=]
@@ -329,13 +326,32 @@ namespace TileService.Models.Geometry
                 else if (!numForward.HasValue && !numBackward.HasValue)
                 {
                     // [lanes:both_ways=]
-                    numForward = 1;
-                    numBackward = defaultLanes == 2 ? 1 : 0;
+                    if (direction == LaneDirection.Forward)
+                    {
+                        numForward = defaultLanes - numBoth;
+                        numBackward = 0;
+                    }
+                    else if (direction == LaneDirection.Backward)
+                    {
+                        numForward = 0;
+                        numBackward = defaultLanes - numBoth;
+                    }
+                    else if (defaultLanes == 2)
+                    {
+                        numForward = 1;
+                        numBackward = 1;
+                    }
+                    else
+                    {
+                        numForward = 0;
+                        numBackward = 0;
+                        numBoth = 1;
+                    }
                 }
                 numTotal = numForward + numBackward + numBoth;
             }
 
-            if (numTotal != numForward + numBackward + numBoth || numTotal < 1 || numForward < 0 || numBackward < 0 || numBoth < 0 || (isOneway && numTotal != numForward))
+            if (numTotal != numForward + numBackward + numBoth || numTotal < 1 || numForward < 0 || numBackward < 0 || numBoth < 0 || (direction == LaneDirection.Forward && numTotal != numForward) || (direction == LaneDirection.Backward && numTotal != numBackward))
             {
                 Console.WriteLine($"Warning: Unusual combination of oneway/lanes (name={way.Tags.GetValueOrDefault("name")} oneway={oneway} lanes={lanes} lanes:forward={lanesForward} lanes:backward={lanesBackward} lanes:both_ways={lanesBothWays})");
             }
@@ -343,7 +359,7 @@ namespace TileService.Models.Geometry
             return new DrivingLanes
             {
                 Motorway = isMotorway,
-                Oneway = isOneway,
+                Direction = direction,
                 Forward = numForward.Value,
                 Both = numBoth.Value,
                 Backward = numBackward.Value,
