@@ -6,4 +6,4 @@ build_script:
 test_script:
 - cmd: dotnet test TileService.Tests
 artifacts:
-- path: TileService\bin\Release\net5.0\publish
+- path: TileService\bin\Release\net8.0\publish
