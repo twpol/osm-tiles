@@ -20,16 +20,16 @@ namespace TileService.Models.Common
         const int LaneArrowZoomMinimum = 18;
         static readonly Rgba32 SidewalkColor = new(128, 128, 128);
         static readonly Rgba32 VergeColor = new(0, 64, 0);
-        static readonly Pen KerbLine = new(new Rgba32(192, 192, 192), 1);
+        static readonly SolidPen KerbLine = new(new Rgba32(192, 192, 192), 1);
         static readonly Rgba32 ParkingColor = new(64, 64, 192);
         static readonly Rgba32 ShoulderColor = new(192, 192, 192);
         static readonly Rgba32 CycleLaneColor = new(64, 192, 64);
         static readonly Rgba32 CarLaneColor = new(0, 0, 0);
-        static readonly Pen LaneLine = new(new Rgba32(255, 255, 255), 1, new float[] {
+        static readonly PatternPen LaneLine = new(new Rgba32(255, 255, 255), 1, new float[] {
             10,
             5,
         });
-        static readonly Pen LaneSameDirLine = new(new Rgba32(255, 255, 255), 1, new float[] {
+        static readonly PatternPen LaneSameDirLine = new(new Rgba32(255, 255, 255), 1, new float[] {
             5,
             10,
         });
@@ -62,8 +62,8 @@ namespace TileService.Models.Common
         const int DefaultGaugeMM = 1435;
         const float SleeperWidth = 1.8f; // Sleeper size of 250mm x 130mm x 2600mm vs default gauge is 1.8118466899
         const float BallastWidth = 2.8f; // Center-to-center spacing of 4.0m vs default gauge is 2.7874564460
-        static readonly Pen RailLine = new(new Rgba32(192, 192, 192), 1);
-        static readonly Pen DisusedRailLine = new(new Rgba32(64, 64, 64), 1);
+        static readonly SolidPen RailLine = new(new Rgba32(192, 192, 192), 1);
+        static readonly SolidPen DisusedRailLine = new(new Rgba32(64, 64, 64), 1);
         static readonly Rgba32 SleeperColour = new(133, 133, 130); // https://en.wikipedia.org/wiki/List_of_colors - battleship grey
         static readonly Rgba32 BallastColour = new(102, 66, 33); // https://en.wikipedia.org/wiki/List_of_colors - dark brown
 
@@ -248,7 +248,7 @@ namespace TileService.Models.Common
 
                                         if (LaneTransitionKerb.Contains(transition) && tile.Zoom >= LaneKerbZoomMinimum)
                                         {
-                                            context.DrawLines(
+                                            context.DrawLine(
                                                 KerbLine,
                                                 lanePoints
                                             );
@@ -259,7 +259,7 @@ namespace TileService.Models.Common
                                             var laneLine = road.Lanes[laneIndex - 1].Direction == road.Lanes[laneIndex].Direction
                                                 ? LaneSameDirLine
                                                 : LaneLine;
-                                            context.DrawLines(
+                                            context.DrawLine(
                                                 laneLine,
                                                 lanePoints
                                             );
@@ -301,8 +301,8 @@ namespace TileService.Models.Common
 
                                 var line = railway == "disused" ? DisusedRailLine : RailLine;
 
-                                context.DrawLines(line, railPoints1);
-                                context.DrawLines(line, railPoints2);
+                                context.DrawLine(line, railPoints1);
+                                context.DrawLine(line, railPoints2);
                             }
                         });
                     }
