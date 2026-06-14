@@ -12,7 +12,14 @@ namespace TileService.Models.Overpass
     {
         const string OverpassAPIEndpoint = "https://overpass-api.de/api/interpreter";
 
-        static readonly HttpClient Client = new();
+        static readonly HttpClient Client = GetClient();
+
+        static HttpClient GetClient()
+        {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("User-Agent", "JGR-OSM-Tiles/1.0 (https://github.com/twpol/osm-tiles)");
+            return client;
+        }
 
         public static async Task<Response> GetTile(Tile tile)
         {

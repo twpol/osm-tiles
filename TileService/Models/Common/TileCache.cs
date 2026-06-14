@@ -49,13 +49,17 @@ namespace TileService.Models.Common
                 if (Tiles.TryGetValue(key, out var task))
                 {
                     Order.Remove(key);
-                    Order.Add(key);
-                    return task;
+                    if (!task.IsCompletedSuccessfully || DateTime.Now < task.Result.Expiry)
+                    {
+                        Order.Add(key);
+                        return task;
+                    }
+                    Console.WriteLine($"TileCache: {task.Result} expired");
                 }
 
                 var tile = Loader(zoom, x, y);
                 task = tile.Load();
-                Tiles.Add(key, task);
+                Tiles[key] = task;
                 Order.Add(key);
 
                 while (Order.Count > CacheSize)
@@ -64,7 +68,7 @@ namespace TileService.Models.Common
                     Order.RemoveAt(0);
                 }
 
-                Console.WriteLine($"Caching {tile} ({Order.Count} / {CacheSize})");
+                Console.WriteLine($"TileCache: {Order.Count}/{CacheSize}");
 
                 return task;
             }
