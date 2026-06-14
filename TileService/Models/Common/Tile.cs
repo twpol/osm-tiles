@@ -17,7 +17,7 @@ namespace TileService.Models.Common
         static readonly TimeSpan EXPIRY_INITIAL = TimeSpan.FromMinutes(5);
         static readonly TimeSpan EXPIRY_LOADED = TimeSpan.FromHours(12);
 
-        public static readonly TileCache Cache = new(14, 16, 22, 16, (zoom, x, y) => new Tile(zoom, x, y), (zoom, x, y, copy) => new Tile(zoom, x, y, copy));
+        public static readonly TileCache Cache = new(14, 16, 22, 256, (zoom, x, y) => new Tile(zoom, x, y), (zoom, x, y, copy) => new Tile(zoom, x, y, copy));
 
         public DateTime Expiry { get; private set; }
         public int Zoom { get; }
