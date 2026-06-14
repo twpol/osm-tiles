@@ -41,7 +41,7 @@ namespace TileService.Controllers.Overlays
             var start = DateTimeOffset.UtcNow;
             var stream = Renderer.Render(tile, 1024, rails: true, roads: true, debug: false);
             var end = DateTimeOffset.UtcNow;
-            Console.WriteLine($"Rendered {type} on {tile} in {(end - start).TotalMilliseconds:F0} ms");
+            Console.WriteLine($"{tile}: Rendered {type} in {(end - start).TotalMilliseconds:F0} ms");
 
             HttpContext.Response.Headers.Add("Cache-Control", new[] { "public", "max-age=43200" });
 

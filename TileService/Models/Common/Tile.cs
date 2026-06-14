@@ -14,8 +14,12 @@ namespace TileService.Models.Common
     {
         protected const double C = 40075016.686;
 
+        static readonly TimeSpan EXPIRY_INITIAL = TimeSpan.FromMinutes(5);
+        static readonly TimeSpan EXPIRY_LOADED = TimeSpan.FromHours(12);
+
         public static readonly TileCache Cache = new(14, 16, 22, 16, (zoom, x, y) => new Tile(zoom, x, y), (zoom, x, y, copy) => new Tile(zoom, x, y, copy));
 
+        public DateTime Expiry { get; private set; }
         public int Zoom { get; }
         public int X { get; }
         public int Y { get; }
@@ -30,6 +34,7 @@ namespace TileService.Models.Common
 
         public Tile(int zoom, int x, int y)
         {
+            Expiry = DateTime.Now.Add(EXPIRY_INITIAL);
             Zoom = zoom;
             X = x;
             Y = y;
@@ -43,6 +48,7 @@ namespace TileService.Models.Common
         {
             Debug.Assert(copy.Layers != null, "Cannot copy data from Tile without any data");
 
+            Expiry = copy.Expiry;
             Layers = copy.Layers;
             Rails = copy.Rails;
             Roads = copy.Roads;
@@ -75,7 +81,10 @@ namespace TileService.Models.Common
         {
             Debug.Assert(Layers == null, "Cannot load data for Tile more than once");
 
+            Console.WriteLine($"{this}: Loading...");
             var overpass = await Overpass.Query.GetTile(this);
+            if (overpass.elements.Length > 0) Expiry = DateTime.Now.Add(EXPIRY_LOADED);
+
             var overpassWays = overpass.elements.Where(element => element.type == "way" && element.tags != null).ToArray();
             var overpassNodes = overpass.elements.Where(element => element.type == "node").ToArray();
 
@@ -189,7 +198,7 @@ namespace TileService.Models.Common
                 );
             }));
 
-            Console.WriteLine($"new {this}: {Rails.Count} rails, {Roads.Count} roads, {RoadJunctions.Count} road junctions");
+            Console.WriteLine($"{this}: Loaded {Rails.Count} rails, {Roads.Count} roads, {RoadJunctions.Count} road junctions (expires {Expiry:yyyy-MM-dd HH:mm:ss})");
 
             return this;
         }
